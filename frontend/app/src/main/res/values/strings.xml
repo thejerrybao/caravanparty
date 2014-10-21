@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">frontend</string>
+    <string name="title_activity_caravan_map">Caravan</string>
+    <string name="title_activity_login">login</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_homepage">homepage</string>
+    <string name="title_activity_past_caravan">past_caravan</string>
+    <string name="title_activity_create_caravan">create_caravan</string>
+    <string name="title_activity_friends">friends</string>
+    <string name="title_activity_find_friends">find_friends</string>
+
+</resources>
