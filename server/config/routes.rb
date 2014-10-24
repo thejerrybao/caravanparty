@@ -1,4 +1,14 @@
 Rails.application.routes.draw do
+
+  # api/v1
+  scope module: 'api/v1' do
+    resources :users
+    resources :friends
+    resources :caravans
+    resources :user_caravans
+    resources :caravan_participants
+  end
+          
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
