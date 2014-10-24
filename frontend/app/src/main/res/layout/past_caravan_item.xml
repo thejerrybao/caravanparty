@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <TextView
+        android:text="Caravan ID"
+        android:id="@+id/list_item_destination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+    <TextView
+        android:text="Members: Jerry, Byran, Angelica,Kevin"
+        android:id="@+id/list_item_members"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/list_item_destination"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+</RelativeLayout>
