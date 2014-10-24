@@ -2,8 +2,20 @@ Rails.application.routes.draw do
 
   # api/v1
   scope module: 'api/v1' do
+    post '/register', to: 'users#register'
+    post '/login', to: 'users#login'
+    
     resources :users do
-      resources :friends
+      member do
+        get 'location'
+      end
+      resources :friends do
+        collection do
+          get 'requests'
+          post 'accept/:other_user_id/'
+          post 'deny/:other_user_id/'
+        end
+    end
     resources :caravans
   end
           
