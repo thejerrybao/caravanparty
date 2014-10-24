@@ -1,6 +1,6 @@
 class CreateCaravans < ActiveRecord::Migration
   def change
-    create_table :caravans do |t|
+    create_table :caravans, id: false do |t|
       t.primary_key :caravan_id
       t.integer :host_user_id
       t.float :dest_latitude
