@@ -2,17 +2,16 @@ $SUCCESS = 1
 
 class CaravansController < ApplicationController
   
-  # GET caravans/:caravan_id
+  # GET caravans/:id
   def show
-    id = params[:caravan_id]
-    caravan = Caravan.get_caravan(id)
+    caravan = Caravan.get_caravan(params[:id])
     if caravan.is_a? Integer    # error code
       render json: {reply_code: caravan}
       return
     end
 
-    render json: {reply_code: $SUCCESS, caravan_id: id, 
-      host_id: caravan.host_user_id, participants: Caravan.get_participants(id)}
+    render json: {reply_code: $SUCCESS, id: params[:id], host_id: 
+      caravan.host_user_id, participants: Caravan.get_participants(params[:id])}
   end
 
 end
