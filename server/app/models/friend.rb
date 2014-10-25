@@ -18,7 +18,7 @@ class Friend < ActiveRecord::Base
   end
 
   def self.add(id1, id2)
-    if User.where(user_id: id2).empty?
+    if User.where(user_id: id2).empty? # user_id2 doesn't exist
       return $ERR_USER_DOESNT_EXIST
     end
 
@@ -66,7 +66,7 @@ class Friend < ActiveRecord::Base
   end
 
   def self.check_request(id1, id2)
-    if User.where(user_id: id2).empty?
+    if User.where(user_id: id1).empty? || User.where(user_id: id2).empty?
       return $ERR_USER_DOESNT_EXIST
     end
     friend = Friend.where(user_id: id2, other_user_id: id1).first
