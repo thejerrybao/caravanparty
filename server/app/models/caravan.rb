@@ -61,5 +61,9 @@ class Caravan < ActiveRecord::Base
     
     return caravan
   end
+
+  def self.get_participants(caravan_id)
+    return CaravanUser.where(caravan_id: id, accepted_invitation: true).map{|user| user.user_id}
+  end
   
 end

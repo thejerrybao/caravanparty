@@ -12,17 +12,11 @@ Rails.application.routes.draw do
     end
     resources :friends do
       collection do
-        get 'requests', to: 'friends#requests'
-        post 'accept/:other_user_id', to: 'friends#accept'
-        post 'deny/:other_user_id', to: 'friends#deny'
+        get 'requests', to: 'users#requests'
+        post 'accept/:other_user_id', to: 'users#accept'
+        post 'deny/:other_user_id', to: 'userss#deny'
+        get '/', to: 'users#friends'
       end
-      # resources :friends do
-      #   collection do
-      #     get 'requests'
-      #     post 'accept/:other_user_id/'
-      #     post 'deny/:other_user_id/'
-      #   end
-      # end
     end
   end
   
