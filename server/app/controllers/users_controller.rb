@@ -13,37 +13,23 @@ class UsersController < ApplicationController
     render json: login
   end
 
-<<<<<<< HEAD
   # GET /users/:id
-=======
-  # GET /users/:user_id
->>>>>>> cb2a54a1e6d8dd4afa9a8ac278b8073e016b968f
   def show
     user = User.getUser(params[:id])
     render json: user
   end
 
-<<<<<<< HEAD
   # GET /users/:id/location
-=======
-  # GET /users/:user_id/location
->>>>>>> cb2a54a1e6d8dd4afa9a8ac278b8073e016b968f
   def location
     userLocation = User.getUserLocation(params[:id])
     render json: userLocation
   end
 
-<<<<<<< HEAD
   # GET /users/:id/caravans
-=======
-  # GET /users/:user_id/caravans
->>>>>>> cb2a54a1e6d8dd4afa9a8ac278b8073e016b968f
   def caravans
     userCaravans = User.getUserCaravans(params[:id])
     render json: userCaravans
   end
-<<<<<<< HEAD
-=======
 
   # GET /users/:user_id/friends/requests
   def requests
@@ -52,7 +38,6 @@ class UsersController < ApplicationController
       render json: {reply_code: caravan}
       return
     end
->>>>>>> cb2a54a1e6d8dd4afa9a8ac278b8073e016b968f
 
     requests = requests.map{|friend| friend.user_id}
     render json: {reply_code: $SUCCESS, requests: requests}
