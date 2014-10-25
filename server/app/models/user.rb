@@ -56,6 +56,8 @@ class User < ActiveRecord::Base
         friends2.each do |friend|
           jsonReturn[:friend_ids].push(friend.user_id)
         end
+      else
+        jsonReturn[:reply_code] = ERR_BAD_CREDENTIALS
       end
     else
       jsonReturn[:reply_code] = ERR_BAD_CREDENTIALS
