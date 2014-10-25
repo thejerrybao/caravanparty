@@ -13,21 +13,21 @@ ERR_INVALID_USERNAME = -3
 
 describe Users do
 
-    it "should not allow a user to login if the credentials are incorrect" do
-        r = User.register("testusername", "testpassword")
-        l = User.login("testusername", "wrongpassword")
-        expect(l[:reply_code]).to be < 0
-    end
+  it "should not allow a user to login if the credentials are incorrect" do
+    r = User.register("testusername", "testpassword")
+    l = User.login("testusername", "wrongpassword")
+    expect(l[:reply_code]).to be < 0
+  end
 
-    it "should login if the credentials are correct" do
-        r = User.register("testusername", "testpassword")
-        l = User.login("testusername", "wrongpassword")
-        expect(l[:reply_code]).to be == 1
-    end
+  it "should login if the credentials are correct" do
+    r = User.register("testusername", "testpassword")
+    l = User.login("testusername", "wrongpassword")
+    expect(l[:reply_code]).to be == 1
+  end
 
-    it "should register the user successfully" do
-        r = User.register("testusername", "testpassword")
-        expect(r[:reply_code]).to be == 1
-    end
+  it "should register the user successfully" do
+    r = User.register("testusername", "testpassword")
+    expect(r[:reply_code]).to be == 1
+  end
 
 end
