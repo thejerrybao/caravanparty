@@ -1,8 +1,8 @@
 class User < ActiveRecord::Base
   has_many :friends
 
-    VAILD_USERNAME = ^[a-z][\w.]{5-17}$/i
-    VALID_PASSWORD = .{5, 64}
+    VAILD_USERNAME = "^[a-z][\w.]{5-17}$/i"
+    VALID_PASSWORD = ".{5, 64}"
     SUCCESS = 1
     ERR_USERNAME_EXISTS = -1
     ERR_BAD_CREDENTIALS = -1
@@ -97,7 +97,7 @@ class User < ActiveRecord::Base
 
     def self.getUserCaravans(user_id)
         jsonReturn = {}
-        caravans = CaravanUsers.where(user_id: user_id)
+        caravans = CaravanUser.where(user_id: user_id)
         if !caravans.blank?
             user = self.getUser(user_id)
             jsonReturn[:user_id] = user[:user_id]
