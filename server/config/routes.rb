@@ -1,24 +1,29 @@
 Rails.application.routes.draw do
 
-  # api/v1
-  scope module: 'api/v1' do
-    post '/register', to: 'users#register'
-    post '/login', to: 'users#login'
-    
-    resources :users do
-      member do
-        get 'location'
-      end
-      resources :friends do
-        collection do
-          get 'requests'
-          post 'accept/:other_user_id/'
-          post 'deny/:other_user_id/'
-        end
+  # /...
+  post 'register', to: 'users#register'
+  post 'login', to: 'users#login'
+  
+  # /users/...
+  resources :users do
+    member do
+      get 'location', to: 'users#location'
+      get 'caravans', to: 'users#caravans'
     end
-    resources :caravans
+    resources :friends do
+      collection do
+        get 'requests', to: 'friends#requests'
+        post 'accept/:other_user_id', to: 'friends#accept'
+        post 'deny/:other_user_id', to: 'friends#deny'
+      end
+    end
   end
-          
+  
+  # /caravans/...
+  resources :caravans
+
+  root 'users#login'
+  
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
