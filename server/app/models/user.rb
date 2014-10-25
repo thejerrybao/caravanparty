@@ -2,6 +2,10 @@ class User < ActiveRecord::Base
   has_many :friends
 
   VALID_USERNAME = /^[0-9a-zA-Z]*$/
+  MAX_USERNAME_LENGTH = 17
+  MIN_USERNAME_LENGTH = 5
+  MAX_PASSWORD_LENGTH = 5
+  MIN_PASSWORD_LENGTH = 64
   SUCCESS = 1
   ERR_USERNAME_EXISTS = -1
   ERR_BAD_CREDENTIALS = -1
@@ -17,16 +21,16 @@ class User < ActiveRecord::Base
     encPassword = BCrypt::Engine.hash_secret(password, salt)
     newUser = self.new(username: username, password: encPassword, salt: salt, latitude: 0, longitude: 0, is_visible: false)
 
-    if !username.validate(VALID_USERNAME)
+    if !username.validate(VALID_USERNAME) and (username.length < MIN_USERNAME_LENGTH or username.length > MAX_USERNAME_LENGTH)
       jsonReturn[:reply_code] = ERR_INVALID_USERNAME
-      elsif password.length < 5 or password.length > 64
-        jsonReturn[:reply_code] = ERR_INVALID_PASSWORD
-      elsif self.where(username: newUser.user).any?
-        jsonReturn[:reply_code] = ERR_USERNAME_EXISTS
-      else
-        newUser.save
-        jsonReturn[:reply_code] = SUCCESS
-      end
+    elsif password.length < MIN_PASSWORD_LENGTH or password.length > MAX_PASSWORD_LENGTH
+      jsonReturn[:reply_code] = ERR_INVALID_PASSWORD
+    elsif self.where(username: newUser.user).any?
+      jsonReturn[:reply_code] = ERR_USERNAME_EXISTS
+    else
+      newUser.save
+      jsonReturn[:reply_code] = SUCCESS
+    end
 
     return jsonReturn
   end
