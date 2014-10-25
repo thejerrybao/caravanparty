@@ -15,6 +15,7 @@ Rails.application.routes.draw do
           post 'accept/:other_user_id/'
           post 'deny/:other_user_id/'
         end
+      end
     end
     resources :caravans
   end
