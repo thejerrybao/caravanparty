@@ -4,16 +4,29 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.view.View;
+import android.content.Intent;
 
 
 public class past_caravan extends Activity {
+    private Button create;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.past_caravan_layout);
-    }
 
+        create = (Button) findViewById(R.id.createCaravan);
+        create.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(past_caravan.this, create_caravan.class);
+                startActivity(i);
+            }
+        });
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
