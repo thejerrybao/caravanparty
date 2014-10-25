@@ -82,7 +82,7 @@ public class homepage extends Activity {
         toCurrentCaravan.setClickable(false);
         currentCaravan.setText("No Current Caravan");
 
-        past = (Button) findViewById(R.id.pastCaravans);
+        /*past = (Button) findViewById(R.id.pastCaravans);
         past.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,7 +98,7 @@ public class homepage extends Activity {
                 Intent i = new Intent(homepage.this, create_caravan.class);
                 startActivity(i);
             }
-        });
+        });*/
     }
 
     @Override
