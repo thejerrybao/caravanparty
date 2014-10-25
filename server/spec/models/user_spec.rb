@@ -14,7 +14,7 @@ ERR_USER_NO_CARAVANS = -1
 ERR_INVALID_PASSWORD = -2
 ERR_INVALID_USERNAME = -3
 
-describe Users do
+describe "Users" do
 
   it "should not allow a user to login if the credentials are incorrect" do
     r = User.register("testusername", "testpassword")
@@ -24,7 +24,7 @@ describe Users do
 
   it "should login if the credentials are correct" do
     r = User.register("testusername", "testpassword")
-    l = User.login("testusername", "wrongpassword")
+    l = User.login("testusername", "testpassword")
     expect(l[:reply_code]).to be == SUCCESS
   end
 
