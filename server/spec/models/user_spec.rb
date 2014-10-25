@@ -52,5 +52,5 @@ describe "Users" do
     r = User.register("testusername", "testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttest1")
     expect(r[:reply_code]).to be == ERR_INVALID_PASSWORD
   end
-
+  
 end

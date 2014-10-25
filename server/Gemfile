@@ -37,4 +37,5 @@ gem 'unicorn'
 # gem 'debugger', group: [:development, :test]
 # KC: Heroku
 gem 'rails_12factor', group: :production
-
+# JB: Code Coverage (simplecov)
+gem 'simplecov', :require => false, :group => :test
