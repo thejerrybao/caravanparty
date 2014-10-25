@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class homepage extends ActionBarActivity {
+public class homepage extends Activity {
 
     public static final String url = "http://salty-mountain-7480.herokuapp.com/";
     public static final int SUCCESS = 1;
@@ -57,6 +58,9 @@ public class homepage extends ActionBarActivity {
         user_id = id;
     }
 
+    private Button past;
+    private Button create;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +81,24 @@ public class homepage extends ActionBarActivity {
 
         toCurrentCaravan.setClickable(false);
         currentCaravan.setText("No Current Caravan");
+
+        past = (Button) findViewById(R.id.pastCaravans);
+        past.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(homepage.this, past_caravan.class);
+                startActivity(i);
+            }
+        });
+
+        create = (Button) findViewById(R.id.createCaravan);
+        create.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(homepage.this, create_caravan.class);
+                startActivity(i);
+            }
+        });
     }
 
     @Override
