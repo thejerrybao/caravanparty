@@ -42,3 +42,6 @@ gem 'unicorn'
 
 # KC: Heroku
 gem 'rails_12factor', group: :production
+
+# JB: bcrypt
+gem 'bcrypt'

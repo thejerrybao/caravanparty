@@ -16,6 +16,13 @@ Rails.application.routes.draw do
         post 'accept/:other_user_id', to: 'friends#accept'
         post 'deny/:other_user_id', to: 'friends#deny'
       end
+      # resources :friends do
+      #   collection do
+      #     get 'requests'
+      #     post 'accept/:other_user_id/'
+      #     post 'deny/:other_user_id/'
+      #   end
+      # end
     end
   end
   
