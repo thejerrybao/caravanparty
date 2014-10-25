@@ -1,17 +1,31 @@
 package com.example.selena_wang.frontend;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 
 public class create_caravan extends Activity {
+
+    private Button createC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_caravan_layout);
+
+        createC = (Button) findViewById(R.id.create);
+        createC.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(create_caravan.this, caravan_map.class);
+                startActivity(i);
+            }
+        });
     }
 
 
