@@ -13,5 +13,5 @@ class CaravansController < ApplicationController
     render json: {reply_code: $SUCCESS, id: params[:id], host_id: 
       caravan.host_user_id, participants: Caravan.get_participants(params[:id])}
   end
-
+  
 end
