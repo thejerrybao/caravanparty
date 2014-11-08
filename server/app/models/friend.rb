@@ -1,5 +1,6 @@
 $SUCCESS = 1
 $ERR_USER_ALREADY_FRIENDS = -1
+$ERR_USER_NOT_FRIENDS = -1
 $ERR_USER_DOESNT_EXIST = -2
 $ERR_USER_NO_REQUEST = -3
 
@@ -37,6 +38,16 @@ class Friend < ActiveRecord::Base
   end
 
   def self.remove(id1, id2)
+    if User.where(user_id: id2).empty? # user_id2 doesn't exist
+      return $ERR_USER_DOESNT_EXIST
+    end
+
+    if Friend.where(user_id: id1, other_user_id: id2).blank? &&
+        Friend.where(user_id: id2, other_user_id: id1).blank?
+      # no friendship entry
+      return $ERR_USER_NOT_FRIENDS
+    end
+
     Friend.destroy_all(user_id: id2, other_user_id: id1)
     Friend.destroy_all(user_id: id1, other_user_id: id2)
 
@@ -69,8 +80,9 @@ class Friend < ActiveRecord::Base
     if User.where(user_id: id1).empty? || User.where(user_id: id2).empty?
       return $ERR_USER_DOESNT_EXIST
     end
+    
     friend = Friend.where(user_id: id2, other_user_id: id1).first
-    if not friend
+    if !friend
       return $ERR_USER_NO_REQUEST
     elsif friend.is_approved
       return $ERR_USER_ALREADY_FRIENDS
