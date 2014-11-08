@@ -43,6 +43,18 @@ class UsersController < ApplicationController
     render json: {reply_code: $SUCCESS, requests: requests}
   end
 
+  # POST /users/:user_id/friends/add/:other_user_id
+  def add
+    code = Friend.add(params[:user_id], params[:other_user_id])
+    render json: {reply_code: code}
+  end
+
+  # POST /users/:user_id/friends/delete/:other_user_id
+  def delete
+    code = Friend.remove(params[:user_id], params[:other_user_id])
+    render json: {reply_code: code}
+  end
+
   # GET /users/:user_id/friends/accept/:other_user_id
   def accept
     code = Friend.accept(params[:user_id], params[:other_user_id])
@@ -58,6 +70,7 @@ class UsersController < ApplicationController
   # GET /users/:user_id/friends
   def friends
     friends = Friend.all_friends(params[:user_id])
+    # other_user_id might be in f.user_id or f.other_user_id, pick the right one
     friends = friends.map{|f| f.user_id == Integer(params[:user_id]) ? f.other_user_id : f.user_id}
     render json: {reply_code: $SUCCESS, friends: friends}
   end
