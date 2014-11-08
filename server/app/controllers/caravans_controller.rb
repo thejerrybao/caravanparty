@@ -10,7 +10,7 @@ class CaravansController < ApplicationController
       return
     end
 
-    render json: {reply_code: $SUCCESS, id: params[:id], 
+    render json: {reply_code: $SUCCESS, id: Integer(params[:id]), 
       host_id: caravan.host_user_id, 
       participants: Caravan.get_participants(params[:id])}
   end
@@ -41,6 +41,12 @@ class CaravansController < ApplicationController
   # POST caravans/:id/deny/:user_id
   def deny
     code = Caravan.deny_invitation(params[:id], params[:user_id])
+    render json: {reply_code: code}
+  end
+
+  # POST caravans/:id/leave/:user_id
+  def leave
+    code = Caravan.remove_user(params[:id], params[:user_id])
     render json: {reply_code: code}
   end
 
