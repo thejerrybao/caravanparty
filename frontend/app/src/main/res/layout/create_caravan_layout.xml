@@ -6,23 +6,81 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.example.selena_wang.warmup_project2.create_caravan">
+    tools:context="com.example.selena_wang.frontend.create_caravan">
+
+<TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Create Caravan"
+        android:id="@+id/createCaravanText"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <TextView
-        android:text="Create Caravan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Destination:"
+        android:id="@+id/destinationText"
+        android:layout_below="@+id/createCaravanText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/inputDestination"
+        android:layout_below="@+id/createCaravanText"
+        android:layout_toRightOf="@+id/destinationText"
+        android:layout_toEndOf="@+id/destinationText"
+        android:layout_alignBottom="@+id/destinationText"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <ExpandableListView
+        android:layout_width="wrap_content"
+        android:id="@+id/destinationList"
+        android:layout_below="@+id/destinationText"
+        android:layout_toRightOf="@+id/destinationText"
+        android:layout_toEndOf="@+id/destinationText"
+        android:layout_height="200px"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Add Friend:"
+        android:id="@+id/addFriendText"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/addFriendInput"
+        android:layout_alignTop="@+id/addFriendText"
+        android:layout_alignLeft="@+id/destinationList"
+        android:layout_alignStart="@+id/destinationList"
+        android:layout_alignBottom="@+id/addFriendText"
+        android:layout_alignRight="@+id/destinationList"
+        android:layout_alignEnd="@+id/destinationList" />
+
+    <ExpandableListView
+        android:layout_width="wrap_content"
+        android:id="@+id/addFriendList"
+        android:layout_height="200px"
+        android:layout_below="@+id/addFriendInput"
+        android:layout_alignLeft="@+id/addFriendInput"
+        android:layout_alignStart="@+id/addFriendInput" />
 
     <Button
-        style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Caravan Map"
-        android:id="@+id/caravanMap"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="29dp" />
+        android:text="Create"
+        android:id="@+id/create"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
