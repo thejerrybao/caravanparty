@@ -2,6 +2,7 @@ require 'rails_helper'
 
 $SUCCESS = 1
 $ERR_USER_ALREADY_FRIENDS = -1
+$ERR_USER_NOT_FRIENDS = -1
 $ERR_USER_DOESNT_EXIST = -2
 $ERR_USER_NO_REQUEST = -3
 
@@ -101,7 +102,7 @@ describe Friend do
     expect(Friend.all_friends(1).length).to eq 0
     expect(Friend.all_friends(2).length).to eq 0
 
-    expect(Friend.remove(1, 2)).to eq $SUCCESS # succeed anyway
+    expect(Friend.remove(1, 2)).to eq $ERR_USER_NOT_FRIENDS
     f = Friend.add(1, 2)
     Friend.accept(2, 1)
     expect(Friend.all_friends(1).length).to eq 1
