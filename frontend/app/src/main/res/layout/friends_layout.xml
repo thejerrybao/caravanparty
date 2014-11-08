@@ -8,23 +8,28 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.example.selena_wang.frontend.friends">
 
+    <RelativeLayout
+        android:id="@+id/friends_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <Button android:id="@+id/findFriends"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="Find Friends"
-        android:layout_centerHorizontal="true"
-        android:onClick="onClickFindFriends"/>
+        <Button android:id="@+id/findFriends"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="Find Friends"
+            android:layout_centerHorizontal="true"
+            android:onClick="onClickFindFriends"/>
 
-    <ListView
-        android:id="@+id/friend_list"
-        android:layout_marginTop="25px"
-        android:scrollbars="vertical"
-        android:layout_below="@+id/findFriends"
-        android:layout_width="fill_parent"
-        android:layout_height="600px"
-        >
-    </ListView>
+        <ListView
+            android:id="@+id/friend_list"
+            android:layout_marginTop="25px"
+            android:scrollbars="vertical"
+            android:layout_below="@+id/findFriends"
+            android:layout_width="fill_parent"
+            android:layout_height="600px"
+            >
+        </ListView>
+    </RelativeLayout>
 
     <fragment
         android:id="@+id/findFriendsFragment"

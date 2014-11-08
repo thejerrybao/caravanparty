@@ -44,10 +44,6 @@
             android:name=".friends"
             android:label="@string/title_activity_friends" >
         </activity>
-        <activity
-            android:name=".find_friends"
-            android:label="@string/title_activity_find_friends" >
-        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

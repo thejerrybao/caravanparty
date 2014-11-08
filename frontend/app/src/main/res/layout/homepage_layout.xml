@@ -18,9 +18,9 @@
     <Button
         android:id="@+id/caravan_button_home"
         android:layout_marginTop="25px"
-        android:layout_marginBottom="25px"
+        android:layout_marginBottom="50px"
         android:layout_width="wrap_content"
-        android:layout_height="100px"
+        android:layout_height="wrap_content"
         android:text="Current Caravan"
         android:layout_below="@+id/username"
         android:layout_centerHorizontal="true"
@@ -29,8 +29,9 @@
         android:id="@+id/caravan_info"
         android:text="No Current Caravan"
         android:layout_width="fill_parent"
-        android:layout_height="100px"
-        android:layout_above="@+id/home_list"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/caravan_button_home"
+        android:layout_marginBottom="50px"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -39,31 +40,7 @@
         android:scrollbars="vertical"
         android:layout_width="fill_parent"
         android:layout_height="500px"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_below="@+id/caravan_info">
     </ListView>
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Create New Caravan"
-        android:id="@+id/createCaravan"
-        android:layout_below="@+id/caravan_button_home"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginLeft="26dp" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Past Caravans"
-        android:id="@+id/pastCaravans"
-        android:layout_alignTop="@+id/createCaravan"
-        android:layout_alignRight="@+id/caravan_info"
-        android:layout_alignEnd="@+id/caravan_info"
-        android:layout_marginRight="51dp" />
 
 </RelativeLayout>

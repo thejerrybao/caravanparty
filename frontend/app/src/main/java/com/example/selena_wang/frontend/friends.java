@@ -1,5 +1,6 @@
 package com.example.selena_wang.frontend;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -41,7 +43,6 @@ public class friends extends Activity {
     }
 
     ListView friendList;
-    Button findFriends = (Button) findViewById(R.id.findFriends);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,11 @@ public class friends extends Activity {
         // Inflate the menu; this adds items to the action bar if it is present.
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.action_bar, menu);
+
+        ActionBar bar = getActionBar();
+        bar.setHomeButtonEnabled(true);
+        bar.setDisplayShowHomeEnabled(true);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -82,7 +88,7 @@ public class friends extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if(id==R.id.home){
+        if(id==android.R.id.home){
             Intent intent = new Intent(this,homepage.class);
             if(homepage.getActive()){
                 intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -93,23 +99,37 @@ public class friends extends Activity {
             FragmentManager manager = getFragmentManager();
             Fragment find_friends_fragment = manager.findFragmentById(R.id.findFriendsFragment);
             int width = find_friends_fragment.getView().getWidth();
-            if(width==RelativeLayout.LayoutParams.MATCH_PARENT){
-                find_friends_fragment.getView().getLayoutParams().width = 0;
+            if(width!=0){
+                RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.friends_main);
+                main_layout.setVisibility(View.VISIBLE);
+                ViewGroup.LayoutParams layout = find_friends_fragment.getView().getLayoutParams();
+                layout.width = 0;
+                find_friends_fragment.getView().setLayoutParams(layout);
             }
         }else if (id == R.id.caravan_icon){
             Intent intent = new Intent(this,caravan_map.class);
+            if(caravan_map.getActive()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
             startActivity(intent);
         }else if(id == R.id.create_icon){
             Intent intent = new Intent(this,create_caravan.class);
+            if(create_caravan.getActive()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }
 
     public void onClickFindFriends(View view){
+        RelativeLayout main_layout = (RelativeLayout) findViewById(R.id.friends_main);
+        main_layout.setVisibility(View.INVISIBLE);
         FragmentManager manager = getFragmentManager();
         Fragment find_friends_fragment = manager.findFragmentById(R.id.findFriendsFragment);
-        find_friends_fragment.getView().getLayoutParams().width = RelativeLayout.LayoutParams.MATCH_PARENT;
+        ViewGroup.LayoutParams layout = find_friends_fragment.getView().getLayoutParams();
+        layout.width = RelativeLayout.LayoutParams.MATCH_PARENT;
+        find_friends_fragment.getView().setLayoutParams(layout);
     }
 
 

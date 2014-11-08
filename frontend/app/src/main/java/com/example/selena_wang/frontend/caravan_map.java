@@ -1,7 +1,12 @@
 package com.example.selena_wang.frontend;
 
+import android.app.ActionBar;
+import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -9,6 +14,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class caravan_map extends FragmentActivity {
+
+
+    private static boolean active = false;
+
+    public static boolean getActive(){
+        return active;
+    }
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
 
@@ -23,6 +35,61 @@ public class caravan_map extends FragmentActivity {
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
+    }
+
+    @Override
+    protected void onRestart(){
+        super.onRestart();
+        active = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        active = false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_bar, menu);
+
+        ActionBar bar = getActionBar();
+        bar.setHomeButtonEnabled(true);
+        bar.setDisplayShowHomeEnabled(true);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if(id==android.R.id.home){
+            Intent intent = new Intent(this,homepage.class);
+            if(homepage.getActive()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
+            startActivity(intent);
+        }
+        else if (id == R.id.friend_icon) {
+            Intent intent = new Intent(this,friends.class);
+            if(friends.getActive()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
+            startActivity(intent);
+        }else if (id == R.id.caravan_icon){
+        }else if(id == R.id.create_icon){
+            Intent intent = new Intent(this,create_caravan.class);
+            if(create_caravan.getActive()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**

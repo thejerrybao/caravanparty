@@ -35,7 +35,7 @@ import java.util.List;
 
 public class homepage extends Activity {
 
-    public static final String url = "http://salty-mountain-7480.herokuapp.com/";
+    public static final String url = "http://caravanparty.herokuapp.com/";
     public static final int SUCCESS = 1;
     public static final int ERR_USER_ALREADY_EXISTS = -1;
     public static final int ERR_USER_DOESNT_EXIST = -2;
@@ -47,16 +47,23 @@ public class homepage extends Activity {
         return active;
     }
 
-    private static String user_id = "";
+    private static String username;
+    private static int user_id;
+    private static int[] friend_ids;
     ListView list;
 
-    public static String get_user_id(){
+    public static String get_username(){return username;}
+    private void set_username(String name){username = name;}
+
+    public static int get_user_id(){
         return user_id;
     }
-
-    private void set_user_id(String id){
+    private void set_user_id(int id){
         user_id = id;
     }
+
+    public static int [] getFriend_ids(){return friend_ids;}
+    private void setFriend_ids(int[] ids){friend_ids = ids;}
 
     private Button past;
     private Button create;
@@ -69,11 +76,16 @@ public class homepage extends Activity {
         TextView user = (TextView) findViewById(R.id.username);
         Button toCurrentCaravan = (Button) findViewById(R.id.caravan_button_home);
         TextView currentCaravan = (TextView) findViewById(R.id.caravan_info);
-        String username="";
         Intent intent = getIntent();
         if(intent!=null) {
-            if (intent.hasExtra("User")) {
-                username = intent.getStringExtra("User");
+            if (intent.hasExtra("name")) {
+                set_username(intent.getStringExtra("name"));
+            }
+            if(intent.hasExtra("user_id")){
+                set_user_id(intent.getIntExtra("user_id",0));
+            }
+            if(intent.hasExtra("friend_ids")){
+                setFriend_ids(intent.getIntArrayExtra("friend_ids"));
             }
         }
         user.setText("Welcome " + username + "!");
@@ -81,24 +93,6 @@ public class homepage extends Activity {
 
         toCurrentCaravan.setClickable(false);
         currentCaravan.setText("No Current Caravan");
-
-        past = (Button) findViewById(R.id.pastCaravans);
-        past.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(homepage.this, past_caravan.class);
-                startActivity(i);
-            }
-        });
-
-        create = (Button) findViewById(R.id.createCaravan);
-        create.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(homepage.this, create_caravan.class);
-                startActivity(i);
-            }
-        });
     }
 
     @Override
@@ -144,9 +138,15 @@ public class homepage extends Activity {
             startActivity(intent);
         }else if (id == R.id.caravan_icon){
             Intent intent = new Intent(this,caravan_map.class);
+            if(caravan_map.getActive()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
             startActivity(intent);
         }else if(id == R.id.create_icon){
             Intent intent = new Intent(this,create_caravan.class);
+            if(create_caravan.getActive()){
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
@@ -165,8 +165,8 @@ public class homepage extends Activity {
         }
 
         private void createList(String parameter){
-            String friend_url = "users/" + user_id + "/friends";
-            String caravans_url = "users/" + user_id + "/caravans";
+            String friend_url = "users/" + get_user_id() + "/friends";
+            String caravans_url = "users/" + get_user_id() + "/caravans";
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost  httpPost_friend = new HttpPost(url + friend_url);
             HttpPost  httpPost_caravans = new HttpPost(url+caravans_url);
