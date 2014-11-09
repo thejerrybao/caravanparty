@@ -1,4 +1,42 @@
 Rails.application.routes.draw do
+
+  # /...
+  post 'register', to: 'users#register'
+  post 'login', to: 'users#login'
+  
+  # /users/...
+  resources :users do
+    member do
+      get 'location', to: 'users#location'
+      get 'caravans', to: 'users#caravans'
+    end
+    resources :friends do
+      collection do
+        get 'requests', to: 'users#requests'
+        post 'add/:other_user_id', to: 'users#add'
+        post 'delete/:other_user_id', to: 'users#delete'
+        post 'accept/:other_user_id', to: 'users#accept'
+        post 'deny/:other_user_id', to: 'users#deny'
+        get '/', to: 'users#friends'
+      end
+    end
+  end
+  
+  # /caravans/...
+  resources :caravans do
+    collection do
+      post 'create/:user_id', to: 'caravans#create'
+    end
+    member do
+      post 'invite/:user_id', to: 'caravans#invite'
+      post 'accept/:user_id', to: 'caravans#accept'
+      post 'deny/:user_id', to: 'caravans#deny'
+      post 'leave/:user_id', to: 'caravans#leave'
+    end
+  end
+
+  root 'users#login'
+  
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -11,7 +49,7 @@ Rails.application.routes.draw do
   # Example of named route that can be invoked with purchase_url(id: product.id)
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
 
-  # Example resource route (maps HTTP verbs to controller actions automatically):
+          # Example resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
 
   # Example resource route with options:
