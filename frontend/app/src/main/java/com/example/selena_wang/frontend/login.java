@@ -31,9 +31,9 @@ public class login extends Activity {
 
     public static final int SUCCESS = 1;
     public static final int ERR_BAD_CREDENTIALS = -1;
-    public static final int ERR_USER_EXISTS = -2;
-    public static final int ERR_BAD_USERNAME = -3;
-    public static final int ERR_BAD_PASSWORD = -4;
+    public static final int ERR_USERNAME_EXISTS = -1;
+    public static final int ERR_INVALID_USERNAME = -3;
+    public static final int ERR_INVALID_PASSWORD = -2;
     public static final int MAX_USERNAME_LENGTH = 128;
     public static final int MAX_PASSWORD_LENGTH = 128;
 
