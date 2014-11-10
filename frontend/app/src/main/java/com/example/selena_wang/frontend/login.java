@@ -26,8 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class login extends Activity {
-//    public static final String url = "http://caravanparty.herokuapp.com/";
-    public static final String url = "http://salty-mountain-7480.herokuapp.com/";
+    public static final String base_url = "http://caravanparty.herokuapp.com/";
 
     public static final int SUCCESS = 1;
     public static final int ERR_BAD_CREDENTIALS = -1;
@@ -41,7 +40,6 @@ public class login extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_layout);
-        //getActionBar().setTitle("Login Counter");
     }
 
 
@@ -72,24 +70,18 @@ public class login extends Activity {
     public void onClickCreate(View view){
         String username = ((EditText) findViewById(R.id.inputUser)).getText().toString();
         String password = ((EditText) findViewById(R.id.inputPass)).getText().toString();
-        if(username.length()>MAX_USERNAME_LENGTH || username.length()==0) {
-            createAlertDialog(ERR_BAD_USERNAME);
-        }else if(password.length()>MAX_PASSWORD_LENGTH){
-            createAlertDialog(ERR_BAD_PASSWORD);
-        }else {
-            new MyAsyncTask().execute("add");
-        }
+        new MyAsyncTask().execute("register");
     }
 
     public void createAlertDialog(int ERR){
         String message = "";
         if(ERR==ERR_BAD_CREDENTIALS){
             message = "Invalid username and password combination. Please try again.";
-        }else if(ERR==ERR_BAD_PASSWORD){
+        }else if(ERR==ERR_INVALID_PASSWORD){
             message = "The password should be at most 128 characters long. Please try again.";
-        }else if(ERR==ERR_BAD_USERNAME){
+        }else if(ERR==ERR_INVALID_USERNAME){
             message = "The user name should be non-empty and at most 128 characters long. Please try again.";
-        }else if(ERR==ERR_USER_EXISTS){
+        }else if(ERR==ERR_USERNAME_EXISTS){
             message = "This username already exists. Please try again.";
         }else{
             message = "Unknown Error";
@@ -118,13 +110,13 @@ public class login extends Activity {
         private void postData(String parameter) {
             HttpClient httpclient = new DefaultHttpClient();
             String extend_url = "";
-            if(parameter.equals("add")){ extend_url = "users/add";}
-            if(parameter.equals("login")){extend_url="users/login";}
-            HttpPost httppost = new HttpPost(url + extend_url);
+            if(parameter.equals("register")){ extend_url = "register/";}
+            if(parameter.equals("login")){extend_url="login/";}
+            HttpPost httppost = new HttpPost(base_url + extend_url);
             username = ((EditText) findViewById(R.id.inputUser)).getText().toString();
             password = ((EditText) findViewById(R.id.inputPass)).getText().toString();
             List data= new ArrayList();
-            data.add(new BasicNameValuePair("user", username));
+            data.add(new BasicNameValuePair("username", username));
             data.add(new BasicNameValuePair("password",password));
             try{
                 httppost.setEntity(new UrlEncodedFormEntity(data));
@@ -152,17 +144,15 @@ public class login extends Activity {
                 @Override
                 public void run() {
                     int ERR = 100;
-                    int count = 100;
                     try {
-                        ERR = json2.getInt("errCode");
-                        count = json2.getInt("count");
+                        ERR = json2.getInt("reply_code");
                     }catch(JSONException e){
                         e.printStackTrace();
                     }
                     if(ERR==SUCCESS){
                         Intent intent = new Intent(login.this, homepage.class);
-                        intent.putExtra("User", username);
-                        intent.putExtra("Count", count);
+                        intent.putExtra("username", username);
+                        intent.putExtra("password", count);
                         startActivity(intent);
                     }else {
                         createAlertDialog(ERR);
