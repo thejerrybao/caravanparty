@@ -78,8 +78,8 @@ public class homepage extends Activity {
         TextView currentCaravan = (TextView) findViewById(R.id.caravan_info);
         Intent intent = getIntent();
         if(intent!=null) {
-            if (intent.hasExtra("name")) {
-                set_username(intent.getStringExtra("name"));
+            if (intent.hasExtra("username")) {
+                set_username(intent.getStringExtra("username"));
             }
             if(intent.hasExtra("user_id")){
                 set_user_id(intent.getIntExtra("user_id",0));
