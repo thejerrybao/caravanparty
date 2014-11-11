@@ -152,7 +152,7 @@ public class login extends Activity {
                     if(ERR==SUCCESS){
                         Intent intent = new Intent(login.this, homepage.class);
                         intent.putExtra("username", username);
-                        intent.putExtra("password", count);
+                        intent.putExtra("password", password);
                         startActivity(intent);
                     }else {
                         createAlertDialog(ERR);
