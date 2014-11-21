@@ -100,6 +100,31 @@ class User < ActiveRecord::Base
     return jsonReturn
   end
 
+  def self.setUserLocation(user_id, latitude, longitude)
+    jsonReturn = {}
+    user = self.find_by(user_id: user_id)
+    if !user.blank?
+      user.latitude = latitude
+      user.longitude = longitude
+      user.save
+      jsonReturn[:reply_code] = SUCCESS
+    else
+      jsonReturn[:reply_code] = ERR_USER_DOESNT_EXIST
+    end
+  end
+
+  def self.setUserVisibility(user_id, is_visible)
+    jsonReturn = {}
+    user = self.find_by(user_id: user_id)
+    if !user.blank?
+      user.is_visible = is_visible
+      user.save
+      jsonReturn[:reply_code] = SUCCESS
+    else
+      jsonReturn[:reply_code] = ERR_USER_DOESNT_EXIST
+    end
+  end
+
   def self.getUserCaravans(user_id)
     jsonReturn = {}
     caravans = CaravanUser.where(user_id: user_id)
