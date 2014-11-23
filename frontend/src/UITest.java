@@ -18,39 +18,22 @@ public class UITest extends UiAutomatorTestCase {
         // Simulate a short press on the HOME button.
         getUiDevice().pressHome();
 
-        // We’re now in the home screen. Next, we want to simulate
-        // a user bringing up the All Apps screen.
-        // If you use the uiautomatorviewer tool to capture a snapshot
-        // of the Home screen, notice that the All Apps button’s
-        // content-description property has the value “Apps”.  We can
-        // use this property to create a UiSelector to find the button.
+        // Simulate bringing up all apps
         UiObject allAppsButton = new UiObject(new UiSelector()
                 .description("Apps"));
-
-        // Simulate a click to bring up the All Apps screen.
         allAppsButton.clickAndWaitForNewWindow();
 
-        // In the All Apps screen, the Settings app is located in
-        // the Apps tab. To simulate the user bringing up the Apps tab,
-        // we create a UiSelector to find a tab with the text
-        // label “Apps”.
+        // Simulate click to enter apps tab
         UiObject appsTab = new UiObject(new UiSelector()
                 .text("Apps"));
-
-        // Simulate a click to enter the Apps tab.
         appsTab.click();
 
-        // Next, in the apps tabs, we can simulate a user swiping until
-        // they come to the Settings app icon.  Since the container view
-        // is scrollable, we can use a UiScrollable object.
+        // Simulate a user swiping until they come to the Settings app icon.
         UiScrollable appViews = new UiScrollable(new UiSelector()
                 .scrollable(true));
-
         // Set the swiping mode to horizontal (the default is vertical)
         appViews.setAsHorizontalList();
-
-        // Create a UiSelector to find the Settings app and simulate
-        // a user click to launch the app.
+        // Create a UiSelector to find the App
         UiObject caravanApp = appViews.getChildByText(new UiSelector()
                         .className(android.widget.TextView.class.getName()),
                 "Log In");
@@ -59,9 +42,48 @@ public class UITest extends UiAutomatorTestCase {
         // Validate that the package name is the expected one
         UiObject caravanValidation = new UiObject(new UiSelector()
                 .packageName("com.example.selena_wang.frontend"));
-        assertTrue("Unable to detect Caravan",
-                caravanValidation.exists());
+        assertTrue("Unable to detect Caravan", caravanValidation.exists());
 
+        //check register
+        register();
+        checkHome();
+        getUiDevice().pressBack();
+
+        //check login
+        login();
+        checkHome();
+
+        //check friend
+        friend();
+        goHome();
+        checkHome();
+
+        //check create caravan
+        createCaravan();
+        goHome();
+        checkHome();
+
+        //check create map
+        caravanMap();
+        goHome();
+        checkHome();
+
+    }
+
+    public void register() throws UiObjectNotFoundException{
+        UiObject caravanUserInput = new UiObject(new UiSelector().resourceId("inputUser"));
+        UiObject caravanPassInput = new UiObject(new UiSelector().resourceId("inputPass"));
+        UiObject caravanRegister = new UiObject(new UiSelector().resourceId("createButton"));
+
+        assertTrue("No User Input",caravanUserInput.exists());
+        assertTrue("No Password Input",caravanPassInput.exists());
+
+        caravanUserInput.setText("byran8");
+        caravanPassInput.setText("byran");
+        caravanRegister.clickAndWaitForNewWindow();
+    }
+
+    public void login() throws UiObjectNotFoundException{
         UiObject caravanUserInput = new UiObject(new UiSelector().resourceId("inputUser"));
         UiObject caravanPassInput = new UiObject(new UiSelector().resourceId("inputPass"));
         UiObject caravanLogin = new UiObject(new UiSelector().resourceId("loginButton"));
@@ -72,7 +94,9 @@ public class UITest extends UiAutomatorTestCase {
         caravanUserInput.setText("byran8");
         caravanPassInput.setText("byran");
         caravanLogin.clickAndWaitForNewWindow();
+    }
 
+    public void friend() throws UiObjectNotFoundException{
         UiObject friendButton = new UiObject(new UiSelector().resourceId("friend_icon"));
         assertTrue("No Friend Button",friendButton.exists());
         friendButton.clickAndWaitForNewWindow();
@@ -85,18 +109,15 @@ public class UITest extends UiAutomatorTestCase {
         assertTrue("Did not go to Find Friends",searchButton.clickable());
         friendButton.clickAndWaitForNewWindow();
         assertFalse("Did not go to Find Friends",searchButton.clickable());
+    }
 
-        UiObject homeButton = new UiObject(new UiSelector().resourceId("home"))
-        homeButton.clickAndWaitForNewWindow();
-
+    public void createCaravan() throws UiObjectNotFoundException{
         UiObject createButton = new UiObject(new UiSelector().resourceId("create_icon"));
         assertTrue("No Create Button", createButton.exists());
         createButton.clickAndWaitForNewWindow();
+    }
 
-        UiObject caravanMapButton = new UiObject(new UiSelector().resourceId("caravanMap"));
-        assertTrue("Did not go to Create Caravan",searchButton.clickable());
-
-        homeButton.clickAndWaitForNewWindow();
+    public void caravanMap() throws UiObjectNotFoundException{
 
         UiObject caravanButton = new UiObject(new UiSelector().resourceId("caravan_icon"));
         assertTrue("No Caravan Button",caravanButton.exists());
@@ -104,7 +125,14 @@ public class UITest extends UiAutomatorTestCase {
 
         UiObject map = new UiObject(new UiSelector().resourceId("map"));
         assertTrue("No Map",map.exists());
+    }
 
+    public void goHome() throws UiObjectNotFoundException{
 
     }
+
+    public void checkHome() throws UiObjectNotFoundException{
+
+    }
+
 }

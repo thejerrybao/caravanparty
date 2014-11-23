@@ -67,11 +67,13 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
     private static final int caravan = 1;
     private static final int friend = 2;
     private static final int ERROR = 3;
-    public int getItemViewType(String[] item){
-        if(item[0]=="friend"){
+    public int getItemViewType(int position){
+        if(list.get(position)[1]=="friend"){
             return friend_request;
-        }else if(item[0]=="caravan"){
+        }else if(list.get(position)[1]=="caravan") {
             return caravan;
+        }else if(list.get(position)[1]=="friend"){
+            return friend;
         }else{
            return ERROR;
         }
@@ -178,7 +180,7 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
 
         private void friendRequest(String parameter, int position) {
             HttpClient httpclient = new DefaultHttpClient();
-            String extend_url = "users/" + homepage.get_user_id() + "/friend_request";
+            String extend_url = "users/" + homepage.get_user_id() + "/friends/accept/" + list.get(position)[2];
             HttpPost httppost = new HttpPost(homepage.url + extend_url);
             username = "placeholder";
             List data = new ArrayList();
@@ -192,6 +194,7 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
                 HttpResponse response = httpclient.execute(httppost);
                 try {
                     JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
+                    System.out.println(json.getString("reply_code"));
 
                 } catch (JSONException e) {
                     e.printStackTrace();

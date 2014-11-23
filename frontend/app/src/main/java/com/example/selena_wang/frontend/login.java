@@ -17,11 +17,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Intent;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -144,15 +146,29 @@ public class login extends Activity {
                 @Override
                 public void run() {
                     int ERR = 100;
+                    String name = "user";
+                    String user_id = "user_id";
+                    ArrayList<String> friends = new ArrayList<String>();
                     try {
                         ERR = json2.getInt("reply_code");
+                        name = json2.getString("name");
+                        user_id = json2.getString("user_id");
+                        JSONArray json_friends = json2.getJSONArray("friend_ids");
+                        if (json_friends!=null){
+                            for(int i = 0; i<json_friends.length(); i++){
+                                friends.add(json_friends.get(i).toString());
+                            }
+                        }
+
                     }catch(JSONException e){
                         e.printStackTrace();
                     }
                     if(ERR==SUCCESS){
                         Intent intent = new Intent(login.this, homepage.class);
-                        intent.putExtra("username", username);
+                        intent.putExtra("username", name);
+                        intent.putExtra("user_id",user_id);
                         intent.putExtra("password", password);
+                        intent.putExtra("friend_ids",friends);
                         startActivity(intent);
                     }else {
                         createAlertDialog(ERR);
