@@ -1,4 +1,4 @@
-$SUCCESS = 1
+$SUCCESS = "SUCCESS"
 
 class CaravansController < ApplicationController
   
