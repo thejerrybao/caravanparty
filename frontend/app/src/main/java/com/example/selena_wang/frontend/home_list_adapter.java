@@ -23,16 +23,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by selena_wang on 10/23/14.
  */
 public class home_list_adapter extends BaseAdapter implements ListAdapter {
 
-    // friend list structure = [time, "friend", username]
+    // friend list structure = [time, "friend", username, user_id]
     //friend_request structure = [time, "friend_request", username]
     //past caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
     private ArrayList<String[]> list = new ArrayList<String[]>();
@@ -68,14 +72,15 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
     private static final int friend = 2;
     private static final int ERROR = 3;
     public int getItemViewType(int position){
-        if(list.get(position)[1]=="friend"){
+        String temp = list.get(position)[1];
+        if(temp=="friend_request"){
             return friend_request;
-        }else if(list.get(position)[1]=="caravan") {
+        }else if(temp=="caravan") {
             return caravan;
-        }else if(list.get(position)[1]=="friend"){
+        }else if(temp=="friend"){
             return friend;
         }else{
-           return ERROR;
+            return ERROR;
         }
     }
 
@@ -102,8 +107,7 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
                     deleteBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            list.remove(position);
-                            notifyDataSetChanged();
+                            new MyAsyncTask().execute("deny", Integer.toString(position));
                             //remove from database
                         }
                     });
@@ -111,9 +115,7 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
                     addBtn.setOnClickListener(new View.OnClickListener(){
                         @Override
                         public void onClick(View v) {
-                            new MyAsyncTask().execute("friend_request",Integer.toString(position));
-                            list.remove(position);
-                            notifyDataSetChanged();
+                            new MyAsyncTask().execute("friend_request", Integer.toString(position));
                             //remove from database
                         }
                     });
@@ -129,9 +131,21 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
                 case friend:
                     convertView = mInflater.inflate(R.layout.friend_item,null);
                     holder.text1 = (TextView)convertView.findViewById(R.id.friend_item_string);
+                    holder.text2 = (TextView) convertView.findViewById(R.id.friend_item_id);
+                    holder.delete = (Button) convertView.findViewById(R.id.delete_friend);
                     holder.text1.setText(list.get(position)[2]);
+                    holder.text2.setText(list.get(position)[3] + " is your friend's id");
+                    holder.delete.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
+                            new MyAsyncTask().execute("delete",Integer.toString(position));
+                            //remove from database
+                        }
+                    });
                 case ERROR:
-                    throw new NullPointerException("Not Friend Request or Caravan");
+                    Logger logger = Logger.getAnonymousLogger();
+                    Exception e = new NullPointerException("Not Friend, Request, or Caravan");
+                    logger.log(Level.WARNING, "an exception was thrown", e);
             }
             convertView.setTag(holder);
         }
@@ -167,35 +181,41 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
     }
 
     private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
-        private String username;
-        private String password;
+
+        int ERR = 100;
+        int SUCCESS = 1;
+        int position = -1;
+        Boolean added = false;
+        Boolean denied = false;
+        Boolean deleted = false;
 
         @Override
         protected Double doInBackground(String... params) {
             if (params[0].equals("friend_request")) {
                 friendRequest(params[0], Integer.valueOf(params[1]));
             }
+            if(params[0].equals("deny")){
+                denyRequest(params[0],Integer.valueOf(params[1]));
+            }
+            if(params[0].equals("delete")){
+                deleteFriend(params[0],Integer.valueOf(params[1]));
+            }
             return null;
         }
 
-        private void friendRequest(String parameter, int position) {
+        private void friendRequest(String parameter, int position1) {
+            position = position1;
             HttpClient httpclient = new DefaultHttpClient();
             String extend_url = "users/" + homepage.get_user_id() + "/friends/accept/" + list.get(position)[2];
             HttpPost httppost = new HttpPost(homepage.url + extend_url);
-            username = "placeholder";
-            List data = new ArrayList();
-            data.add(new BasicNameValuePair("user", username));
-            try {
-                httppost.setEntity(new UrlEncodedFormEntity(data));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
             try {
                 HttpResponse response = httpclient.execute(httppost);
                 try {
                     JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
-                    System.out.println(json.getString("reply_code"));
-
+                    ERR = json.getInt("reply_code");
+                    if(ERR==SUCCESS){
+                        added = true;
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -204,5 +224,65 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
                 e.printStackTrace();
             }
         }
+
+        private void denyRequest(String parameter, int position1) {
+            position = position1;
+            HttpClient httpclient = new DefaultHttpClient();
+            String extend_url = "users/" + homepage.get_user_id() + "/friends/delete/" + list.get(position)[2];
+            HttpPost httppost = new HttpPost(homepage.url + extend_url);
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                try {
+                    JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
+                    ERR = json.getInt("reply_code");
+                    if(ERR==SUCCESS){
+                        denied = true;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void deleteFriend(String parameter, int position1) {
+            position = position1;
+            HttpClient httpclient = new DefaultHttpClient();
+            String extend_url = "users/" + homepage.get_user_id() + "/friends/deny/" + list.get(position)[2];
+            HttpPost httppost = new HttpPost(homepage.url + extend_url);
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                try {
+                    JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
+                    ERR = json.getInt("reply_code");
+                    if(ERR==SUCCESS){
+                        deleted = true;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        protected void onPostExecute(Double result){
+            if (added){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+            if(denied){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+            if(deleted){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+        }
+
     }
 }

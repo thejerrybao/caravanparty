@@ -19,6 +19,7 @@ import android.widget.TextView;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -78,7 +79,7 @@ public class homepage extends Activity {
         TextView currentCaravan = (TextView) findViewById(R.id.caravan_info);
         Intent intent = getIntent();
         if(intent!=null) {
-            if (intent.hasExtra("user")) {
+            if (intent.hasExtra("username")) {
                 set_username(intent.getStringExtra("username"));
             }
             if(intent.hasExtra("user_id")){
@@ -88,7 +89,7 @@ public class homepage extends Activity {
                 setFriend_ids(intent.getIntArrayExtra("friend_ids"));
             }
         }
-        user.setText("Welcome " + get_username() + "with id" + get_user_id() + "!");
+        user.setText("Welcome " + get_username() + " with id: " + get_user_id() + "!");
         user.setTextSize(20);
 
         toCurrentCaravan.setClickable(false);
@@ -99,6 +100,11 @@ public class homepage extends Activity {
     protected void onRestart(){
         super.onRestart();
         active = true;
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
         createListView();
     }
 
@@ -110,7 +116,6 @@ public class homepage extends Activity {
 
     private void createListView(){
         new MyAsyncTask().execute("list");
-
     }
 
     @Override
@@ -168,22 +173,11 @@ public class homepage extends Activity {
             String friend_url = "users/" + get_user_id() + "/friends/requests";
             String caravans_url = "users/" + get_user_id() + "/caravans";
             HttpClient httpclient = new DefaultHttpClient();
-            HttpPost  httpPost_friend = new HttpPost(url + friend_url);
-            HttpPost  httpPost_caravans = new HttpPost(url+caravans_url);
-            List data1 = new ArrayList();
-            List data2 = new ArrayList();
-            data1.add(get_user_id());
-            data2.add(get_user_id());
+            HttpGet httpGet_friend = new HttpGet(url + friend_url);
+            HttpGet  httpGet_caravans = new HttpGet(url+caravans_url);
             try{
-                httpPost_friend.setEntity(new UrlEncodedFormEntity(data1));
-                httpPost_caravans.setEntity(new UrlEncodedFormEntity(data2));
-
-            }catch (UnsupportedEncodingException e){
-                e.printStackTrace();
-            }
-            try{
-                HttpResponse response_friend = httpclient.execute(httpPost_friend);
-                HttpResponse response_caravans = httpclient.execute(httpPost_caravans);
+                HttpResponse response_friend = httpclient.execute(httpGet_friend);
+                HttpResponse response_caravans = httpclient.execute(httpGet_caravans);
                 try{
                     JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
                     JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
@@ -198,40 +192,61 @@ public class homepage extends Activity {
 
         }
 
+        private JSONArray friends_array;
+        private JSONArray caravans_array;
+        private boolean setAdapter = false;
+        private ArrayList<String[]> list_file = new ArrayList<String[]>();
+
         // list structure = [caravan/friend, username/caravan_id, caravan destination, caravan members]
         private void create_listView(JSONObject friends, JSONObject caravans){
-            JSONArray friend_array = new JSONArray();
-            JSONArray caravans_array = new JSONArray();
             try{
-                friend_array = friends.getJSONArray("user_ids");
-                caravans_array = caravans.getJSONArray("user_ids");
+                friends_array = friends.getJSONArray("requests");
+
             }catch(JSONException e){
                 e.printStackTrace();
+                if(friends_array==null){
+                    friends_array = new JSONArray();
+                }
             }
-            ArrayList<String[]> list_file = new ArrayList<String[]>();
-
-            //friend_request structure = [time, "friend_request", username]
-            //past caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
-            for(int i = 0; i<friend_array.length(); i++){
-                try {
-                    list_file.add(new String[]{"0","friend_request",friend_array.getJSONObject(i).toString()});
-                }catch(JSONException e){
-                    e.printStackTrace();
+            try{
+                caravans_array = caravans.getJSONArray("caravan_ids");
+            }catch(JSONException e){
+                if(caravans_array==null){
+                    caravans_array = new JSONArray();
                 }
             }
 
-//            for(int i = 0; i<caravans_array.length(); i++){
-//                try {
-//                    list_file.add(new String[]{"0","caravan",caravans_array.getJSONObject(i).toString()});
-//                }catch(JSONException e){
-//                    e.printStackTrace();
-//                }
-//            }
+            list_file = new ArrayList<String[]>();
 
-            home_list_adapter home_list_adapter= new home_list_adapter(list_file,homepage.this);
-            list.setAdapter(home_list_adapter);
+            //friend_request structure = [time, "friend_request", username]
+            //past caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
+            for(int i = 0; i<friends_array.length(); i++){
+                try {
+                    String adding = Integer.toString(friends_array.getInt(i));
+                    list_file.add(new String[]{"0","friend_request",adding});
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+                setAdapter = true;
+            }
 
+            for(int i = 0; i<caravans_array.length(); i++){
+                try {
+                    list_file.add(new String[]{"0","caravan",caravans_array.getJSONObject(i).toString()});
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+                setAdapter = true;
+            }
         }
+
+        protected void onPostExecute(Double result){
+            if (setAdapter){
+                home_list_adapter home_list_adapter= new home_list_adapter(list_file,homepage.this);
+                list.setAdapter(home_list_adapter);
+            }
+        }
+
 
 
     }
