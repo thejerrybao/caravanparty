@@ -30,6 +30,8 @@ class User < ActiveRecord::Base
     else
       newUser.save
       jsonReturn[:reply_code] = SUCCESS
+      jsonReturn[:user_id] = newUser.user_id
+      jsonReturn[:name] = username
     end
 
     return jsonReturn
