@@ -34,6 +34,7 @@ Rails.application.routes.draw do
       post 'accept/:user_id', to: 'caravans#accept'
       post 'deny/:user_id', to: 'caravans#deny'
       post 'leave/:user_id', to: 'caravans#leave'
+      post 'destination/:destination', to: 'caravans#set_destination'
     end
   end
 

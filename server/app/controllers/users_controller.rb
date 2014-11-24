@@ -46,10 +46,6 @@ class UsersController < ApplicationController
   # GET /users/:user_id/friends/requests
   def requests
     requests = Friend.get_pending_requests(params[:user_id])
-    if requests.is_a? Integer
-      render json: {reply_code: caravan}
-      return
-    end
 
     requests = requests.map{|friend| friend.user_id}
     render json: {reply_code: $SUCCESS, requests: requests}

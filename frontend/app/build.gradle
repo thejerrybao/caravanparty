@@ -24,4 +24,5 @@ dependencies {
     compile 'com.google.android.gms:play-services:4.2.42'
     compile 'com.android.support:appcompat-v7:20.0.0'
     compile files('libs/uiautomator.jar')
+    compile files('libs/robotium-solo-5.2.1.jar')
 }
