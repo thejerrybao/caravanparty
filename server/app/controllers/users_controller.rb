@@ -1,4 +1,4 @@
-$SUCCESS = 1
+$SUCCESS = "SUCCESS"
 class UsersController < ApplicationController
 
   # POST /register
@@ -23,6 +23,18 @@ class UsersController < ApplicationController
   def location
     userLocation = User.getUserLocation(params[:id])
     render json: userLocation
+  end
+
+  # POST /users/:id/location
+  def updatelocation
+    updateUserLocation = User.setUserLocation(params[:id], params[:latitude], params[:longitude])
+    render json: updateUserLocation
+  end
+
+  # POST /users/:id/location/visibility
+  def updateuservisibility
+    updateUserVisibility = User.setUserVisibility(params[:id], params[:is_visible])
+    render json: updateUserVisibility
   end
 
   # GET /users/:id/caravans

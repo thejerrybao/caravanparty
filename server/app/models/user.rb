@@ -6,14 +6,14 @@ class User < ActiveRecord::Base
   MIN_USERNAME_LENGTH = 5
   MAX_PASSWORD_LENGTH = 64
   MIN_PASSWORD_LENGTH = 5
-  SUCCESS = 1
-  ERR_USERNAME_EXISTS = -1
-  ERR_BAD_CREDENTIALS = -1
-  ERR_USER_DOESNT_EXIST = -1
-  ERR_USER_NOT_VISIBLE = -1
-  ERR_USER_NO_CARAVANS = -1
-  ERR_INVALID_PASSWORD = -2
-  ERR_INVALID_USERNAME = -3
+  SUCCESS = "SUCCESS"
+  ERR_USERNAME_EXISTS = "ERR_USERNAME_EXISTS"
+  ERR_BAD_CREDENTIALS = "ERR_BAD_CREDENTIALS"
+  ERR_USER_DOESNT_EXIST = "ERR_USER_DOESNT_EXIST"
+  ERR_USER_NOT_VISIBLE = "ERR_USER_NOT_VISIBLE"
+  ERR_USER_NO_CARAVANS = "ERR_USER_NO_CARAVANS"
+  ERR_INVALID_PASSWORD = "ERR_INVALID_PASSWORD"
+  ERR_INVALID_USERNAME = "ERR_INVALID_USERNAME"
 
   def self.register(username, password)
     jsonReturn = {}
@@ -30,6 +30,8 @@ class User < ActiveRecord::Base
     else
       newUser.save
       jsonReturn[:reply_code] = SUCCESS
+      jsonReturn[:user_id] = newUser.user_id
+      jsonReturn[:name] = username
     end
 
     return jsonReturn
@@ -93,6 +95,35 @@ class User < ActiveRecord::Base
       else
         jsonReturn[:reply_code] = ERR_USER_NOT_VISIBLE
       end
+    else
+      jsonReturn[:reply_code] = ERR_USER_DOESNT_EXIST
+    end
+
+    return jsonReturn
+  end
+
+  def self.setUserLocation(user_id, latitude, longitude)
+    jsonReturn = {}
+    user = self.find_by(user_id: user_id)
+    if !user.blank?
+      user.latitude = latitude
+      user.longitude = longitude
+      user.save
+      jsonReturn[:reply_code] = SUCCESS
+    else
+      jsonReturn[:reply_code] = ERR_USER_DOESNT_EXIST
+    end
+
+    return jsonReturn
+  end
+
+  def self.setUserVisibility(user_id, is_visible)
+    jsonReturn = {}
+    user = self.find_by(user_id: user_id)
+    if !user.blank?
+      user.is_visible = is_visible
+      user.save
+      jsonReturn[:reply_code] = SUCCESS
     else
       jsonReturn[:reply_code] = ERR_USER_DOESNT_EXIST
     end
