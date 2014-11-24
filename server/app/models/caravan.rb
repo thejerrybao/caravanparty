@@ -20,7 +20,8 @@ class Caravan < ActiveRecord::Base
       return $ERR_USER_ALREADY_HOSTING
     end
       
-    caravan = Caravan.create(host_user_id: host_id, is_active: true)
+    caravan = Caravan.create(host_user_id: host_id, is_active: true, 
+                             dest_latitude: 0.0, dest_longitude: 0.0)
     CaravanUser.create(caravan_id: caravan.caravan_id, is_host: true, 
                        user_id: host_id, accepted_invitation: true)
     return caravan
@@ -102,8 +103,33 @@ class Caravan < ActiveRecord::Base
   end
 
   def self.get_participants(caravan_id)
-    return CaravanUser.where(caravan_id: caravan_id, 
-                             accepted_invitation: true).map{|user| user.user_id}
+    users = CaravanUser.where(caravan_id: caravan_id, 
+                              accepted_invitation: true).map{|user| user.user_id}
+
+    participants = {}
+    for i in 0..(users.length - 1)
+      user = User.find_by(user_id: users[i])
+      participants[Integer(users[i])] = {:latitude => user.latitude, :longitude => user.longitude}
+    end
+
+    return participants
   end
+
+  def self.set_destination(caravan_id, destination)
+    caravan = Caravan.find_by(caravan_id: caravan_id)
+    if !caravan
+      return $ERR_CARAVAN_DOESNT_EXIST
+    end
+
+    destination = destination.split('+')
+    lat, lng = destination.map{|s| Float(s)}
+
+    caravan.dest_latitude = lat
+    caravan.dest_longitude = lng
+    caravan.save
+
+    return $SUCCESS
+  end
+    
   
 end
