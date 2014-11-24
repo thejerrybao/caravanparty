@@ -7,7 +7,9 @@ Rails.application.routes.draw do
   # /users/...
   resources :users do
     member do
+      post 'location/visibility' to: 'users#updateuservisibility'
       get 'location', to: 'users#location'
+      post 'location' to: 'users#updatelocation'
       get 'caravans', to: 'users#caravans'
     end
     resources :friends do

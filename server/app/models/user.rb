@@ -111,6 +111,8 @@ class User < ActiveRecord::Base
     else
       jsonReturn[:reply_code] = ERR_USER_DOESNT_EXIST
     end
+
+    return jsonReturn
   end
 
   def self.setUserVisibility(user_id, is_visible)
@@ -123,6 +125,8 @@ class User < ActiveRecord::Base
     else
       jsonReturn[:reply_code] = ERR_USER_DOESNT_EXIST
     end
+
+    return jsonReturn
   end
 
   def self.getUserCaravans(user_id)

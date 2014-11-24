@@ -25,6 +25,18 @@ class UsersController < ApplicationController
     render json: userLocation
   end
 
+  # POST /users/:id/location
+  def updatelocation
+    updateUserLocation = User.setUserLocation(params[:id], params[:latitude], params[:longitude])
+    render json: updateUserLocation
+  end
+
+  # POST /users/:id/location/visibility
+  def updateuservisibility
+    updateUserVisibility = User.setUserVisibility(params[:id], params[:is_visible])
+    render json: updateUserVisibility
+  end
+
   # GET /users/:id/caravans
   def caravans
     userCaravans = User.getUserCaravans(params[:id])
