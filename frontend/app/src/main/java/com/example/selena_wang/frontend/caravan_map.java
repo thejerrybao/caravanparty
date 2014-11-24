@@ -2,21 +2,64 @@ package com.example.selena_wang.frontend;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Color;
+import android.location.Location;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class caravan_map extends FragmentActivity {
 
+    private double myLatitude;
+    private double myLongitude;
+    private Location myLocation;
+
+    private double marinaLat = 37.865265;
+    private double marinaLong = -122.309411;
+    private double tempLat = 37.867399;
+    private double tempLong = -122.263364;
+
+
+    ArrayList<LatLng> markerPoints;
 
     private static boolean active = false;
+    private String directionsURL = "http://maps.googleapis.com/maps/api/directions/json?";
 
     public static boolean getActive(){
         return active;
@@ -28,13 +71,22 @@ public class caravan_map extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.caravan_map_layout);
+
+        // Initializing array List
+        markerPoints = new ArrayList<LatLng>();
+
         setUpMapIfNeeded();
+        caravanLocations = new ArrayList<LatLng>();
+        caravanLocations.add(new LatLng(37.865129, -122.256178));
+        caravanLocations.add(new LatLng(37.869296, -122.252616));
+        caravanLocations.add(new LatLng(37.873463, -122.274095));
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setUpMapIfNeeded();
+        setUpMap();
     }
 
     @Override
@@ -114,11 +166,17 @@ public class caravan_map extends FragmentActivity {
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
             // Check if we were successful in obtaining the map.
+
+            mMap.setMyLocationEnabled(true);
             if (mMap != null) {
-                setUpMap();
+//                setUpMap();
+
             }
         }
     }
+
+
+    public ArrayList<LatLng> caravanLocations;
 
     /**
      * This is where we can add markers or lines, add listeners or move the camera. In this case, we
@@ -127,6 +185,281 @@ public class caravan_map extends FragmentActivity {
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        myLocation = mMap.getMyLocation();
+//        if (myLocation!=null){
+//            myLatitude = myLocation.getLatitude();
+//            myLongitude = myLocation.getLongitude();
+        mMap.addMarker(new MarkerOptions().position(new LatLng(tempLat,tempLong)).title("Me"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(marinaLat,marinaLong))
+                .title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        final LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(new LatLng(myLatitude, myLongitude)).include(new LatLng(marinaLat, marinaLong)).build();
+//        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+        for(int i = 0; i<caravanLocations.size(); i++){
+            mMap.addMarker(new MarkerOptions().position(caravanLocations.get(i))
+                    .title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+        }
+//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLatitude, myLongitude), 8));
+
+//        }else{
+//            mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("NOT ME"));
+//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 8));
+//        }
+//        mMap.setOnMyLocationChangeListener(myLocationChangeListener);
+        markerPoints.add(new LatLng(tempLat,tempLong));
+        markerPoints.add(new LatLng(marinaLat,marinaLong));
+        LatLng origin = markerPoints.get(0);
+        LatLng dest = markerPoints.get(1);
+        String url = getDirectionsUrl(origin, dest);
+
+        DownloadTask downloadTask = new DownloadTask();
+
+        downloadTask.execute(url);
     }
+
+//    private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
+//        @Override
+//        public void onMyLocationChange(Location location) {
+//            LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+//            Marker mMarker = mMap.addMarker(new MarkerOptions().position(loc));
+//            if(mMap != null){
+//                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+//            }
+//        }
+//    };
+
+    private String getDirectionsUrl(LatLng origin,LatLng dest){
+
+        String str_origin = "origin="+origin.latitude+","+origin.longitude;
+        String str_dest = "destination="+dest.latitude+","+dest.longitude;
+
+        String sensor = "sensor=false";
+
+
+        String parameters = str_origin+"&"+str_dest+"&"+sensor;
+        String output = "json";
+
+        return "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
+    }
+
+    private String downloadUrl(String strUrl) throws IOException{
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try{
+            URL url = new URL(strUrl);
+
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            // Connecting to url
+            urlConnection.connect();
+
+            // Reading data from url
+            iStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+            StringBuffer sb  = new StringBuffer();
+
+            String line = "";
+            while( ( line = br.readLine())  != null){
+                sb.append(line);
+            }
+
+            data = sb.toString();
+
+            br.close();
+
+        }catch(Exception e){
+            Log.d("Exception while downloading url", e.toString());
+        }finally{
+            iStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+//    private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
+//        private String username;
+//        private String password;
+//
+//        @Override
+//        protected Double doInBackground(String... params) {
+//            if(params[0].equals("list")){
+//                createList(params[0]);
+//            }
+//            return null;
+//        }
+//
+//        private void createList(String parameter){
+//            String friend_url = "caravan/" + get_user_id() + "/friends/requests";
+//            String caravans_url = "users/" + get_user_id() + "/caravans/invitations";
+//            HttpClient httpclient = new DefaultHttpClient();
+//            HttpGet httpGet_friend = new HttpGet(url + friend_url);
+//            HttpGet  httpGet_caravans = new HttpGet(url+caravans_url);
+//            try{
+//                HttpResponse response_friend = httpclient.execute(httpGet_friend);
+//                HttpResponse response_caravans = httpclient.execute(httpGet_caravans);
+//                try{
+//                    JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
+//                    JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
+//                    create_listView(json_friend, json_caravan);
+//                }catch(JSONException e){
+//                    e.printStackTrace();
+//                }
+//            }catch (IOException e){
+//                e.printStackTrace();
+//            }
+//
+//
+//        }
+//
+//        private JSONArray friends_array;
+//        private JSONArray caravans_array;
+//        private boolean setAdapter = false;
+//        private ArrayList<String[]> list_file = new ArrayList<String[]>();
+//
+//        // list structure = [caravan/friend, username/caravan_id, caravan destination, caravan members]
+//        private void create_listView(JSONObject friends, JSONObject caravans){
+//            try{
+//                friends_array = friends.getJSONArray("requests");
+//
+//            }catch(JSONException e){
+//                e.printStackTrace();
+//                if(friends_array==null){
+//                    friends_array = new JSONArray();
+//                }
+//            }
+//            try{
+//                caravans_array = caravans.getJSONArray("caravan_ids");
+//            }catch(JSONException e){
+//                if(caravans_array==null){
+//                    caravans_array = new JSONArray();
+//                }
+//            }
+//
+//            list_file = new ArrayList<String[]>();
+//
+//            //friend_request structure = [time, "friend_request", username]
+//            //past caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
+//            for(int i = 0; i<friends_array.length(); i++){
+//                try {
+//                    String adding = Integer.toString(friends_array.getInt(i));
+//                    list_file.add(new String[]{"0","friend_request",adding});
+//                }catch(JSONException e){
+//                    e.printStackTrace();
+//                }
+//                setAdapter = true;
+//            }
+//
+//            for(int i = 0; i<caravans_array.length(); i++){
+//                try {
+//                    list_file.add(new String[]{"0","caravan",caravans_array.getJSONObject(i).toString()});
+//                }catch(JSONException e){
+//                    e.printStackTrace();
+//                }
+//                setAdapter = true;
+//            }
+//        }
+//
+//        protected void onPostExecute(Double result){
+//            if (setAdapter){
+//                home_list_adapter home_list_adapter= new home_list_adapter(list_file,homepage.this);
+//                list.setAdapter(home_list_adapter);
+//            }
+//        }
+//
+//
+//
+//    }
+
+    // Fetches data from url passed
+    private class DownloadTask extends AsyncTask<String, Void, String>{
+
+        // Downloading data in non-ui thread
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try{
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+            }catch(Exception e){
+                Log.d("Background Task",e.toString());
+            }
+            return data;
+        }
+
+        // Executes in UI thread, after the execution of
+        // doInBackground()
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            ParserTask parserTask = new ParserTask();
+
+            // Invokes the thread for parsing the JSON data
+            parserTask.execute(result);
+        }
+    }
+
+
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String,String>>>> {
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try{
+                jObject = new JSONObject(jsonData[0]);
+                DirectionsJSONParser parser = new DirectionsJSONParser();
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+            ArrayList<LatLng> points = null;
+            PolylineOptions lineOptions = null;
+            MarkerOptions markerOptions = new MarkerOptions();
+
+            // Traversing through all the routes
+            for(int i=0;i<result.size();i++){
+                points = new ArrayList<LatLng>();
+                lineOptions = new PolylineOptions();
+
+                // Fetching i-th route
+                List<HashMap<String, String>> path = result.get(i);
+
+                // Fetching all the points in i-th route
+                for(int j=0;j<path.size();j++){
+                    HashMap<String,String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                // Adds all the points in the route to lineOptions
+                lineOptions.addAll(points);
+                lineOptions.width(2);
+                lineOptions.color(Color.RED);
+            }
+
+            // Draws route to destination
+            mMap.addPolyline(lineOptions);
+        }
+    }
+
 }

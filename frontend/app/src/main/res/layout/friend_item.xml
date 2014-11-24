@@ -10,4 +10,22 @@
         android:layout_alignParentLeft="true"
         android:textSize="25dp"
         android:textStyle="bold" />
+    <TextView
+        android:text="id"
+        android:id="@+id/friend_item_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:textSize="25dp"
+        android:textStyle="bold"
+        android:layout_below="@+id/friend_item_string"/>
+    <Button
+        android:id="@+id/delete_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/add_btn"
+        android:layout_below="@+id/friend_item_id"
+        android:text="Delete"
+        android:textSize="20dp"
+        />
 </RelativeLayout>

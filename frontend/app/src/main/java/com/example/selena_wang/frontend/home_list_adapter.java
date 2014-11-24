@@ -23,18 +23,22 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by selena_wang on 10/23/14.
  */
 public class home_list_adapter extends BaseAdapter implements ListAdapter {
 
-    // friend list structure = [time, "friend", username]
+    // friend list structure = [time, "friend", username, user_id]
     //friend_request structure = [time, "friend_request", username]
-    //past caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
+    //caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
     private ArrayList<String[]> list = new ArrayList<String[]>();
     private Context context;
 
@@ -67,13 +71,16 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
     private static final int caravan = 1;
     private static final int friend = 2;
     private static final int ERROR = 3;
-    public int getItemViewType(String[] item){
-        if(item[0]=="friend"){
+    public int getItemViewType(int position){
+        String temp = list.get(position)[1];
+        if(temp=="friend_request"){
             return friend_request;
-        }else if(item[0]=="caravan"){
+        }else if(temp=="caravan") {
             return caravan;
+        }else if(temp=="friend"){
+            return friend;
         }else{
-           return ERROR;
+            return ERROR;
         }
     }
 
@@ -100,36 +107,54 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
                     deleteBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            list.remove(position);
-                            notifyDataSetChanged();
-                            //remove from database
+                            new MyAsyncTask().execute("deny", Integer.toString(position));
                         }
                     });
 
                     addBtn.setOnClickListener(new View.OnClickListener(){
                         @Override
                         public void onClick(View v) {
-                            new MyAsyncTask().execute("friend_request",Integer.toString(position));
-                            list.remove(position);
-                            notifyDataSetChanged();
-                            //remove from database
+                            new MyAsyncTask().execute("friend_request", Integer.toString(position));
                         }
                     });
                     break;
                 case caravan:
                     convertView = mInflater.inflate(R.layout.past_caravan_item, null);
                     holder.text1 = (TextView)convertView.findViewById(R.id.list_item_destination);
-                    holder.text2 = (TextView)convertView.findViewById(R.id.list_item_members);
                     holder.text1.setText(list.get(position)[2]);
-                    holder.text2.setText("Members: " + list.get(position)[4]);
-                    convertView.setOnClickListener(new OnItemClickListener(position));
+                    holder.add = (Button)convertView.findViewById(R.id.accept_caravan_btn);
+                    holder.delete = (Button)convertView.findViewById(R.id.deny_caravan_btn);
+                    holder.add.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            new MyAsyncTask().execute("accept_caravan", Integer.toString(position));
+                        }
+                    });
+
+                    holder.delete.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
+                            new MyAsyncTask().execute("deny_caravan", Integer.toString(position));
+                        }
+                    });
                     break;
                 case friend:
                     convertView = mInflater.inflate(R.layout.friend_item,null);
                     holder.text1 = (TextView)convertView.findViewById(R.id.friend_item_string);
+                    holder.text2 = (TextView) convertView.findViewById(R.id.friend_item_id);
+                    holder.delete = (Button) convertView.findViewById(R.id.delete_friend);
                     holder.text1.setText(list.get(position)[2]);
+                    holder.text2.setText(list.get(position)[3] + " is your friend's id");
+                    holder.delete.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
+                            new MyAsyncTask().execute("delete",Integer.toString(position));
+                        }
+                    });
                 case ERROR:
-                    throw new NullPointerException("Not Friend Request or Caravan");
+                    Logger logger = Logger.getAnonymousLogger();
+                    Exception e = new NullPointerException("Not Friend, Request, or Caravan");
+                    logger.log(Level.WARNING, "an exception was thrown", e);
             }
             convertView.setTag(holder);
         }
@@ -145,54 +170,50 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
 
     }
 
-    private class OnItemClickListener  implements View.OnClickListener {
-        private int mPosition;
-
-        OnItemClickListener(int position){
-            mPosition = position;
-        }
-
-        @Override
-        public void onClick(View arg0) {
-            String[] past_caravan_info = list.get(mPosition);
-            Intent intent = new Intent(context,past_caravan.class);
-            intent.putExtra("time",past_caravan_info[0]);
-            intent.putExtra("caravan_id",Integer.valueOf(past_caravan_info[2]));
-            intent.putExtra("caravan_destination",past_caravan_info[3]);
-            intent.putExtra("caravan_members",past_caravan_info[4]);
-            context.startActivity(intent);
-        }
-    }
-
     private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
-        private String username;
-        private String password;
+
+        String ERR = "ERROR";
+        int SUCCESS = 1;
+        int position = -1;
+        Boolean added = false;
+        Boolean denied = false;
+        Boolean deleted = false;
+        Boolean caravan_added = false;
+        Boolean caravan_denied = false;
 
         @Override
         protected Double doInBackground(String... params) {
             if (params[0].equals("friend_request")) {
                 friendRequest(params[0], Integer.valueOf(params[1]));
             }
+            if(params[0].equals("deny")){
+                denyRequest(params[0],Integer.valueOf(params[1]));
+            }
+            if(params[0].equals("delete")){
+                deleteFriend(params[0],Integer.valueOf(params[1]));
+            }
+            if(params[0].equals("accept_caravan")){
+                addCaravan(params[0],Integer.valueOf(params[1]));
+            }
+            if(params[0].equals("deny_caravan")){
+                denyCaravan(params[0],Integer.valueOf(params[1]));
+            }
             return null;
         }
 
-        private void friendRequest(String parameter, int position) {
+        private void friendRequest(String parameter, int position1) {
+            position = position1;
             HttpClient httpclient = new DefaultHttpClient();
-            String extend_url = "users/" + homepage.get_user_id() + "/friend_request";
+            String extend_url = "users/" + homepage.get_user_id() + "/friends/accept/" + list.get(position)[2];
             HttpPost httppost = new HttpPost(homepage.url + extend_url);
-            username = "placeholder";
-            List data = new ArrayList();
-            data.add(new BasicNameValuePair("user", username));
-            try {
-                httppost.setEntity(new UrlEncodedFormEntity(data));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
             try {
                 HttpResponse response = httpclient.execute(httppost);
                 try {
                     JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
-
+                    ERR = json.getString("reply_code");
+                    if(ERR.equals("SUCCESS")){
+                        added = true;
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -201,5 +222,117 @@ public class home_list_adapter extends BaseAdapter implements ListAdapter {
                 e.printStackTrace();
             }
         }
+
+        private void denyRequest(String parameter, int position1) {
+            position = position1;
+            HttpClient httpclient = new DefaultHttpClient();
+            String extend_url = "users/" + homepage.get_user_id() + "/friends/delete/" + list.get(position)[2];
+            HttpPost httppost = new HttpPost(homepage.url + extend_url);
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                try {
+                    JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
+                    ERR = json.getString("reply_code");
+                    if(ERR.equals("SUCCESS")){
+                        denied = true;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void addCaravan(String parameter, int position1) {
+            position = position1;
+            HttpClient httpclient = new DefaultHttpClient();
+            String extend_url = "caravans/" + list.get(position)[2]+ "/accept/" + homepage.get_user_id();
+            HttpPost httppost = new HttpPost(homepage.url + extend_url);
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                try {
+                    JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
+                    ERR = json.getString("reply_code");
+                    if(ERR.equals("SUCCESS")){
+                        caravan_added = true;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void denyCaravan(String parameter, int position1) {
+            position = position1;
+            HttpClient httpclient = new DefaultHttpClient();
+            String extend_url = "caravans/" + list.get(position)[2] + "/deny/" + homepage.get_user_id();
+            HttpPost httppost = new HttpPost(homepage.url + extend_url);
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                try {
+                    JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
+                    ERR = json.getString("reply_code");
+                    if(ERR.equals("SUCCESS")){
+                        caravan_denied = true;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void deleteFriend(String parameter, int position1) {
+            position = position1;
+            HttpClient httpclient = new DefaultHttpClient();
+            String extend_url = "users/" + homepage.get_user_id() + "/friends/deny/" + list.get(position)[2];
+            HttpPost httppost = new HttpPost(homepage.url + extend_url);
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                try {
+                    JSONObject json = new JSONObject(EntityUtils.toString(response.getEntity()));
+                    ERR = json.getString("reply_code");
+                    if(ERR.equals("SUCCESS")){
+                        deleted = true;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        protected void onPostExecute(Double result){
+            if (added){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+            if(denied){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+            if(deleted){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+            if(caravan_added){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+            if(caravan_denied){
+                list.remove(position);
+                notifyDataSetChanged();
+            }
+        }
+
     }
 }

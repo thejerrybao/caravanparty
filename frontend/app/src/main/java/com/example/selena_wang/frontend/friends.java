@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -48,6 +49,7 @@ public class friends extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.friends_layout);
+        friendList = (ListView) findViewById(R.id.friend_list);
         createListView();
     }
 
@@ -55,6 +57,11 @@ public class friends extends Activity {
     protected void onRestart(){
         super.onRestart();
         active = true;
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
         createListView();
     }
 
@@ -135,6 +142,9 @@ public class friends extends Activity {
 
     private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
 
+        ArrayList<String[]> list_file;
+        private Boolean setAdapter = false;
+
         @Override
         protected Double doInBackground(String... params) {
             if(params[0].equals("list")){
@@ -146,16 +156,9 @@ public class friends extends Activity {
         private void createList(String parameter){
             String friend_url = "users/" + homepage.get_user_id() + "/friends";
             HttpClient httpclient = new DefaultHttpClient();
-            HttpPost httpPost_friend = new HttpPost(homepage.url + friend_url);
-            List data1 = new ArrayList();
+            HttpGet httpGet_friend = new HttpGet(homepage.url + friend_url);
             try{
-                httpPost_friend.setEntity(new UrlEncodedFormEntity(data1));
-
-            }catch (UnsupportedEncodingException e){
-                e.printStackTrace();
-            }
-            try{
-                HttpResponse response_friend = httpclient.execute(httpPost_friend);
+                HttpResponse response_friend = httpclient.execute(httpGet_friend);
                 try{
                     JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
                     create_listView(json_friend);
@@ -169,32 +172,51 @@ public class friends extends Activity {
 
         }
 
-        // list structure = [caravan/friend, username/caravan_id, caravan destination, caravan members]
+        private void getUser(String user_id){
+            String friend_url = "users/" + user_id;
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpGet httpGet_friend = new HttpGet(homepage.url + friend_url);
+            try{
+                HttpResponse response_friend = httpclient.execute(httpGet_friend);
+                try{
+                    JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
+                    String name = json_friend.getString("name");
+                    String id = json_friend.getString("user_id");
+                    String[] to_add = {"time","friend", name, id};
+                    list_file.add(to_add);
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        // friend list structure = [time, "friend", username, user_id]
         private void create_listView(JSONObject friends){
             JSONArray friend_array = new JSONArray();
             try{
-                friend_array = friends.getJSONArray("user_ids");
+                friend_array = friends.getJSONArray("friends");
             }catch(JSONException e){
                 e.printStackTrace();
             }
 
-            List<String> user_ids = new ArrayList<String>();
+            list_file = new ArrayList<String[]>();
             for(int i = 0; i<friend_array.length(); i++){
                 try {
-                    user_ids.add(friend_array.getJSONObject(i).toString());
+                    getUser(Integer.toString(friend_array.getInt(i)));
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
             }
+            setAdapter = true;
+        }
 
-            ArrayList<String[]> list_file = new ArrayList<String[]>();
-            for(int i = 0;i<user_ids.size(); i++){
-                String[] to_add = {"time","friend",user_ids.get(i)};
-                list_file.add(to_add);
+        protected void onPostExecute(Double result){
+            if (setAdapter){
+                home_list_adapter friend_list_adapter= new home_list_adapter(list_file,friends.this);
+                friendList.setAdapter(friend_list_adapter);
             }
-            home_list_adapter friend_list_adapter= new home_list_adapter(list_file,friends.this);
-            friendList.setAdapter(friend_list_adapter);
-
         }
 
 

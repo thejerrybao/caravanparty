@@ -10,12 +10,20 @@
         android:layout_centerHorizontal="true"
         android:textSize="20dp"
         android:textStyle="bold" />
-    <TextView
-        android:text="Members: Jerry, Byran, Angelica,Kevin"
-        android:id="@+id/list_item_members"
+    <Button
+        android:id="@+id/accept_caravan_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/list_item_destination"
-        android:textSize="20dp"
-        android:textStyle="bold" />
+        android:text="Accept"
+        android:textSize="20dp"/>
+
+    <Button
+        android:id="@+id/deny_caravan_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/add_btn"
+        android:layout_below="@+id/list_item_destination"
+        android:text="Deny"
+        android:textSize="20dp"/>
 </RelativeLayout>
