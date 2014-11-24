@@ -75,18 +75,19 @@ public class login extends Activity {
         new MyAsyncTask().execute("register");
     }
 
-    public void createAlertDialog(int ERR){
+    public void createAlertDialog(String ERR){
         String message = "";
-        if(ERR==ERR_BAD_CREDENTIALS){
+        if(ERR=="ERR_BAD_CREDENTIALS"){
             message = "Invalid username and password combination. Please try again.";
-        }else if(ERR==ERR_INVALID_PASSWORD){
+        }else if(ERR=="ERR_INVALID_PASSWORD"){
             message = "The password should be at most 128 characters long. Please try again.";
-        }else if(ERR==ERR_INVALID_USERNAME){
+        }else if(ERR=="ERR_INVALID_USERNAME"){
             message = "The user name should be non-empty and at most 128 characters long. Please try again.";
-        }else if(ERR==ERR_USERNAME_EXISTS){
+        }else if(ERR=="ERR_USERNAME_EXISTS"){
             message = "This username already exists. Please try again.";
         }else{
-            message = "Unknown Error";
+            System.out.println("I dont know unknown error?");
+            return;
         }
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(login.this);
         alertDialogBuilder.setMessage(message);
@@ -145,12 +146,12 @@ public class login extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    int ERR = 100;
+                    String ERR = "ERR";
                     String name = "user";
                     String user_id = "user_id";
                     ArrayList<String> friends = new ArrayList<String>();
                     try {
-                        ERR = json2.getInt("reply_code");
+                        ERR = json2.getString("reply_code");
                         name = json2.getString("name");
                         user_id = json2.getString("user_id");
                         JSONArray json_friends = json2.getJSONArray("friend_ids");
@@ -163,16 +164,16 @@ public class login extends Activity {
                     }catch(JSONException e){
                         e.printStackTrace();
                     }
-                    if(ERR==SUCCESS){
+
+                    if(ERR.equals("SUCCESS")){
                         Intent intent = new Intent(login.this, homepage.class);
                         intent.putExtra("username", name);
                         intent.putExtra("user_id",user_id);
                         intent.putExtra("password", password);
                         intent.putExtra("friend_ids",friends);
                         startActivity(intent);
-                    }else {
+                    }else{
                         createAlertDialog(ERR);
-
                     }
                 }
             });

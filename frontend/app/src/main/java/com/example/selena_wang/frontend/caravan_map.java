@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -277,6 +278,100 @@ public class caravan_map extends FragmentActivity {
         }
         return data;
     }
+
+//    private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
+//        private String username;
+//        private String password;
+//
+//        @Override
+//        protected Double doInBackground(String... params) {
+//            if(params[0].equals("list")){
+//                createList(params[0]);
+//            }
+//            return null;
+//        }
+//
+//        private void createList(String parameter){
+//            String friend_url = "caravan/" + get_user_id() + "/friends/requests";
+//            String caravans_url = "users/" + get_user_id() + "/caravans/invitations";
+//            HttpClient httpclient = new DefaultHttpClient();
+//            HttpGet httpGet_friend = new HttpGet(url + friend_url);
+//            HttpGet  httpGet_caravans = new HttpGet(url+caravans_url);
+//            try{
+//                HttpResponse response_friend = httpclient.execute(httpGet_friend);
+//                HttpResponse response_caravans = httpclient.execute(httpGet_caravans);
+//                try{
+//                    JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
+//                    JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
+//                    create_listView(json_friend, json_caravan);
+//                }catch(JSONException e){
+//                    e.printStackTrace();
+//                }
+//            }catch (IOException e){
+//                e.printStackTrace();
+//            }
+//
+//
+//        }
+//
+//        private JSONArray friends_array;
+//        private JSONArray caravans_array;
+//        private boolean setAdapter = false;
+//        private ArrayList<String[]> list_file = new ArrayList<String[]>();
+//
+//        // list structure = [caravan/friend, username/caravan_id, caravan destination, caravan members]
+//        private void create_listView(JSONObject friends, JSONObject caravans){
+//            try{
+//                friends_array = friends.getJSONArray("requests");
+//
+//            }catch(JSONException e){
+//                e.printStackTrace();
+//                if(friends_array==null){
+//                    friends_array = new JSONArray();
+//                }
+//            }
+//            try{
+//                caravans_array = caravans.getJSONArray("caravan_ids");
+//            }catch(JSONException e){
+//                if(caravans_array==null){
+//                    caravans_array = new JSONArray();
+//                }
+//            }
+//
+//            list_file = new ArrayList<String[]>();
+//
+//            //friend_request structure = [time, "friend_request", username]
+//            //past caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
+//            for(int i = 0; i<friends_array.length(); i++){
+//                try {
+//                    String adding = Integer.toString(friends_array.getInt(i));
+//                    list_file.add(new String[]{"0","friend_request",adding});
+//                }catch(JSONException e){
+//                    e.printStackTrace();
+//                }
+//                setAdapter = true;
+//            }
+//
+//            for(int i = 0; i<caravans_array.length(); i++){
+//                try {
+//                    list_file.add(new String[]{"0","caravan",caravans_array.getJSONObject(i).toString()});
+//                }catch(JSONException e){
+//                    e.printStackTrace();
+//                }
+//                setAdapter = true;
+//            }
+//        }
+//
+//        protected void onPostExecute(Double result){
+//            if (setAdapter){
+//                home_list_adapter home_list_adapter= new home_list_adapter(list_file,homepage.this);
+//                list.setAdapter(home_list_adapter);
+//            }
+//        }
+//
+//
+//
+//    }
 
     // Fetches data from url passed
     private class DownloadTask extends AsyncTask<String, Void, String>{

@@ -50,7 +50,7 @@ public class homepage extends Activity {
 
     private static String username;
     private static String user_id;
-    private static int[] friend_ids;
+    private static String[] friend_ids;
     ListView list;
 
     public static String get_username(){return username;}
@@ -63,8 +63,8 @@ public class homepage extends Activity {
         user_id = id;
     }
 
-    public static int [] getFriend_ids(){return friend_ids;}
-    private void setFriend_ids(int[] ids){friend_ids = ids;}
+    public static String [] getFriend_ids(){return friend_ids;}
+    private void setFriend_ids(String[] ids){friend_ids = ids;}
 
     private Button past;
     private Button create;
@@ -86,7 +86,7 @@ public class homepage extends Activity {
                 set_user_id(intent.getStringExtra("user_id"));
             }
             if(intent.hasExtra("friend_ids")){
-                setFriend_ids(intent.getIntArrayExtra("friend_ids"));
+                setFriend_ids(intent.getStringArrayExtra("friend_ids"));
             }
         }
         user.setText("Welcome " + get_username() + " with id: " + get_user_id() + "!");
@@ -171,7 +171,7 @@ public class homepage extends Activity {
 
         private void createList(String parameter){
             String friend_url = "users/" + get_user_id() + "/friends/requests";
-            String caravans_url = "users/" + get_user_id() + "/caravans";
+            String caravans_url = "users/" + get_user_id() + "/caravans/invitations";
             HttpClient httpclient = new DefaultHttpClient();
             HttpGet httpGet_friend = new HttpGet(url + friend_url);
             HttpGet  httpGet_caravans = new HttpGet(url+caravans_url);
