@@ -56,7 +56,7 @@ class Friend < ActiveRecord::Base
   
   def self.accept(id1, id2)
     err = self.check_request(id1, id2)
-    if err < 0
+    if err != $SUCCESS
       return err
     end
     
@@ -68,7 +68,7 @@ class Friend < ActiveRecord::Base
 
   def self.deny(id1, id2)
     err = self.check_request(id1, id2)
-    if err < 0
+    if err != $SUCCESS
       return err
     end
     
