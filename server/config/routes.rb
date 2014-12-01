@@ -11,6 +11,7 @@ Rails.application.routes.draw do
       get 'location', to: 'users#location'
       post 'location', to: 'users#updatelocation'
       get 'caravans', to: 'users#caravans'
+      get 'caravans/requests/', to: 'users#caravanRequests'
     end
     resources :friends do
       collection do
@@ -19,6 +20,7 @@ Rails.application.routes.draw do
         post 'delete/:other_user_id', to: 'users#delete'
         post 'accept/:other_user_id', to: 'users#accept'
         post 'deny/:other_user_id', to: 'users#deny'
+        post 'searchForFriend', to: 'users#searchForFriend'
         get '/', to: 'users#friends'
       end
     end

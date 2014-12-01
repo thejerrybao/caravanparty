@@ -3,6 +3,7 @@ $ERR_USER_ALREADY_FRIENDS = "ERR_USER_ALREADY_FRIENDS"
 $ERR_USER_NOT_FRIENDS = "ERR_USER_NOT_FRIENDS"
 $ERR_USER_DOESNT_EXIST = "ERR_USER_DOESNT_EXIST"
 $ERR_USER_NO_REQUEST = "ERR_USER_NO_REQUEST"
+$ERR_USER_NOT_FOUND = "ERR_USER_NOT_FOUND"
 
 class Friend < ActiveRecord::Base
   belongs_to :user, foreign_key: 'user_id'
@@ -89,6 +90,27 @@ class Friend < ActiveRecord::Base
     end
     
     return $SUCCESS
+  end
+
+  def self.searchForFriendByName(username)
+    jsonReturn = {}
+
+    friendsResult = User.where("username ILIKE ?", "%#{username}%")
+    if friendsResult.empty?
+      jsonReturn[:reply_code] = $ERR_USER_NOT_FOUND
+    else
+      jsonReturn[:reply_code] = $SUCCESS
+      jsonReturn[:users] = Array.new
+      friendsResult.each do |friend|
+        user = {
+          user_id: friend.user_id,
+          username: friend.username
+        }
+        jsonReturn[:users].push(user)
+      end
+    end
+
+    return jsonReturn
   end
 
 end

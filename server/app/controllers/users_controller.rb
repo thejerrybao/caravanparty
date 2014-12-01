@@ -82,5 +82,10 @@ class UsersController < ApplicationController
     friends = friends.map{|f| f.user_id == Integer(params[:user_id]) ? f.other_user_id : f.user_id}
     render json: {reply_code: $SUCCESS, friends: friends}
   end
+
+  def searchForFriend
+    friendsResults = Friend.searchForFriendByName(params[:username])
+    render json: friendsResults
+  end
   
 end
