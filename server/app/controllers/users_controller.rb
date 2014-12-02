@@ -43,6 +43,12 @@ class UsersController < ApplicationController
     render json: userCaravans
   end
 
+  # GET /users/:id/caravans/requests
+  def caravanRequests
+    userCaravanRequests = User.getUserCaravanRequests(params[:id])
+    render json: userCaravanRequests
+  end
+
   # GET /users/:user_id/friends/requests
   def requests
     requests = Friend.get_pending_requests(params[:user_id])
@@ -83,6 +89,7 @@ class UsersController < ApplicationController
     render json: {reply_code: $SUCCESS, friends: friends}
   end
 
+  # POST /users/:user_id/friends/searchForFriend
   def searchForFriend
     friendsResults = Friend.searchForFriendByName(params[:username])
     render json: friendsResults

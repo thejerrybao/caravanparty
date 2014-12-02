@@ -10,8 +10,10 @@ Rails.application.routes.draw do
       post 'location/visibility', to: 'users#updateuservisibility'
       get 'location', to: 'users#location'
       post 'location', to: 'users#updatelocation'
-      get 'caravans', to: 'users#caravans'
-      get 'caravans/requests/', to: 'users#caravanRequests'
+      namespace :caravans do
+        get '/', to: '/users#caravans'
+        get 'requests/', to: '/users#caravanRequests'
+      end
     end
     resources :friends do
       collection do

@@ -14,6 +14,7 @@ class User < ActiveRecord::Base
   ERR_USER_NO_CARAVANS = "ERR_USER_NO_CARAVANS"
   ERR_INVALID_PASSWORD = "ERR_INVALID_PASSWORD"
   ERR_INVALID_USERNAME = "ERR_INVALID_USERNAME"
+  ERR_USER_NO_CARAVAN_REQUESTS = "ERR_USER_NO_CARAVAN_REQUESTS"
 
   def self.register(username, password)
     jsonReturn = {}
@@ -144,6 +145,22 @@ class User < ActiveRecord::Base
       end
     else
       jsonReturn[:reply_code] = ERR_USER_NO_CARAVANS
+    end
+
+    return jsonReturn
+  end
+
+  def self.getUserCaravanRequests(user_id)
+    jsonReturn = {}
+    caravanRequests = CaravanUser.where(user_id: user_id, accepted_invitation: false, is_host: false)
+    if caravanRequests.empty?
+      jsonReturn[:reply_code] = ERR_USER_NO_CARAVAN_REQUESTS
+    else
+      jsonReturn[:reply_code] = SUCCESS
+      jsonReturn[:caravan_ids] = Array.new
+      caravanRequests.each do |caravanRequest|
+        jsonReturn[:caravan_ids].push(caravanRequest.caravan_id)
+      end
     end
 
     return jsonReturn
