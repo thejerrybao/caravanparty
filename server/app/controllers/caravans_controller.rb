@@ -17,7 +17,8 @@ class CaravansController < ApplicationController
       participants: Caravan.get_participants(params[:id]),
       destination: {latitude: caravan.dest_latitude,
         longitude: caravan.dest_longitude},
-      is_active: caravan.is_active}
+      is_active: caravan.is_active,
+      ended_at: caravan.ended_at}
   end
 
   # POST caravans/create/:user_id
@@ -55,6 +56,12 @@ class CaravansController < ApplicationController
     render json: {reply_code: code}
   end
 
+  # POST caravans/:id/end/:user_id
+  def end
+    code = Caravan.end_caravan(params[:id], params[:user_id])
+    render json: {reply_code: code}
+  end
+  
   # POST caravans/:id/destination/:destination
   def set_destination
     code = Caravan.set_destination(params[:id], params[:destination])

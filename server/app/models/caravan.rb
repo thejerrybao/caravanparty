@@ -6,6 +6,7 @@ $ERR_CARAVAN_DOESNT_EXIST = "ERR_CARAVAN_DOESNT_EXIST"
 $ERR_NO_EXISTING_INVITATION = "ERR_NO_EXISTING_INVITATION"
 $ERR_USER_DOESNT_EXIST = "ERR_USER_DOESNT_EXIST"
 $ERR_HOST_CANNOT_BE_REMOVED = "ERR_HOST_CANNOT_BE_REMOVED"
+$ERR_NOT_HOST = "ERR_NOT_HOST"
 
 class Caravan < ActiveRecord::Base
   has_many :caravan_users
@@ -75,9 +76,11 @@ class Caravan < ActiveRecord::Base
     end
     
     cu = CaravanUser.find_by(caravan_id: caravan_id, user_id: user_id)
+    all_cu = CaravanUser.where(caravan_id: caravan_id)
     if !cu
       return $ERR_USER_NOT_IN_CARAVAN
-    elsif cu.is_host
+    elsif cu.is_host && all_cu.length > 1
+      # host cannot leave if he there are others
       return $ERR_HOST_CANNOT_BE_REMOVED
     end
     
@@ -85,12 +88,17 @@ class Caravan < ActiveRecord::Base
     return $SUCCESS
   end
 
-  def self.end_caravan(caravan_id)
-    # TODO: handle past caravan viewing
+  def self.end_caravan(caravan_id, user_id)
     caravan = Caravan.find_by(caravan_id: caravan_id)
+    cu = CaravanUser.find_by(caravan_id: caravan_id, user_id: user_id)
+    if !cu || !cu.is_host
+      return $ERR_NOT_HOST
+    end
     caravan.is_active = false
     caravan.ended_at = DateTime.now
     caravan.save
+
+    return $SUCCESS
   end
 
   def self.get_caravan(caravan_id)
