@@ -37,10 +37,10 @@ import java.util.List;
 public class homepage extends Activity {
 
     public static final String url = "http://caravanparty.herokuapp.com/";
-    public static final int SUCCESS = 1;
-    public static final int ERR_USER_ALREADY_EXISTS = -1;
-    public static final int ERR_USER_DOESNT_EXIST = -2;
-    public static final int ERR_USER_NO_REQUEST = -3;
+    String SUCCESS = "SUCCESS";
+    String ERR_USER_ALREADY_EXISTS = "ERR_USER_ALREADY_EXISTS";
+    String ERR_USER_DOESNT_EXIST = "ERR_USER_DOESNT_EXIST";
+    String ERR_USER_NO_REQUEST = "ERR_USER_NO_REQUEST";
 
     private static boolean active = false;
 
@@ -50,6 +50,7 @@ public class homepage extends Activity {
 
     private static String username;
     private static String user_id;
+    public static String caravanId = "None";
     private static String[] friend_ids;
     ListView list;
 
@@ -63,8 +64,19 @@ public class homepage extends Activity {
         user_id = id;
     }
 
+    public static String get_caravanId(){return caravanId;}
+    public static void set_caravanId(String id){caravanId = id;}
+
+
     public static String [] getFriend_ids(){return friend_ids;}
-    private void setFriend_ids(String[] ids){friend_ids = ids;}
+    private void setFriend_ids(ArrayList<String> ids){
+        String[] result = new String[ids.size()];
+        for (int i = 0; i < ids.size(); i++) {
+            result[i] = ids.get(i);
+        }
+        System.out.println(result);
+        friend_ids = result;
+    }
 
     private Button past;
     private Button create;
@@ -78,6 +90,7 @@ public class homepage extends Activity {
         Button toCurrentCaravan = (Button) findViewById(R.id.caravan_button_home);
         TextView currentCaravan = (TextView) findViewById(R.id.caravan_info);
         Intent intent = getIntent();
+        System.out.println(intent);
         if(intent!=null) {
             if (intent.hasExtra("username")) {
                 set_username(intent.getStringExtra("username"));
@@ -85,15 +98,16 @@ public class homepage extends Activity {
             if(intent.hasExtra("user_id")){
                 set_user_id(intent.getStringExtra("user_id"));
             }
+
             if(intent.hasExtra("friend_ids")){
-                setFriend_ids(intent.getStringArrayExtra("friend_ids"));
+                setFriend_ids(intent.getStringArrayListExtra("friend_ids"));
             }
         }
         user.setText("Welcome " + get_username() + " with id: " + get_user_id() + "!");
         user.setTextSize(20);
 
         toCurrentCaravan.setClickable(false);
-        currentCaravan.setText("No Current Caravan");
+        currentCaravan.setText("Current Caravan: " + get_caravanId());
     }
 
     @Override
