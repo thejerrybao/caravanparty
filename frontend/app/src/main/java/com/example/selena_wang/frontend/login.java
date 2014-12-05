@@ -30,13 +30,13 @@ import java.util.List;
 public class login extends Activity {
     public static final String base_url = "http://caravanparty.herokuapp.com/";
 
-    public static final int SUCCESS = 1;
-    public static final int ERR_BAD_CREDENTIALS = -1;
-    public static final int ERR_USERNAME_EXISTS = -1;
-    public static final int ERR_INVALID_USERNAME = -3;
-    public static final int ERR_INVALID_PASSWORD = -2;
-    public static final int MAX_USERNAME_LENGTH = 128;
-    public static final int MAX_PASSWORD_LENGTH = 128;
+    String SUCCESS = "SUCCESS";
+    String ERR_BAD_CREDENTIALS = "ERR_BAD_CREDENTIALS";
+    String ERR_USERNAME_EXISTS = "ERR_USERNAME_EXISTS";
+    String ERR_INVALID_USERNAME = "ERR_INVALID_USERNAME";
+    String ERR_INVALID_PASSWORD = "ERR_INVALID_PASSWORD";
+    String MAX_USERNAME_LENGTH = "MAX_USERNAME_LENGTH";
+    String MAX_PASSWORD_LENGTH = "MAX_PASSWORD_LENGTH";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
