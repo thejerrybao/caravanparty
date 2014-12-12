@@ -12,6 +12,7 @@ class User < ActiveRecord::Base
   ERR_USER_DOESNT_EXIST = "ERR_USER_DOESNT_EXIST"
   ERR_USER_NOT_VISIBLE = "ERR_USER_NOT_VISIBLE"
   ERR_USER_NO_CARAVANS = "ERR_USER_NO_CARAVANS"
+  ERR_USER_NO_ACTIVE_CARAVANS = "ERR_USER_NO_ACTIVE_CARAVANS"
   ERR_INVALID_PASSWORD = "ERR_INVALID_PASSWORD"
   ERR_INVALID_USERNAME = "ERR_INVALID_USERNAME"
   ERR_USER_NO_CARAVAN_REQUESTS = "ERR_USER_NO_CARAVAN_REQUESTS"
@@ -136,6 +137,7 @@ class User < ActiveRecord::Base
     jsonReturn = {}
     caravans = CaravanUser.where(user_id: user_id)
     if !caravans.blank?
+      jsonReturn[:reply_code] = SUCCESS
       user = self.getUser(user_id)
       jsonReturn[:user_id] = user[:user_id]
       jsonReturn[:name] = user[:name]
@@ -161,6 +163,32 @@ class User < ActiveRecord::Base
       caravanRequests.each do |caravanRequest|
         jsonReturn[:caravan_ids].push(caravanRequest.caravan_id)
       end
+    end
+
+    return jsonReturn
+  end
+
+  def self.getUserActiveCaravans(user_id)
+    jsonReturn = {}
+    caravans = CaravanUser.where(user_id: user_id)
+    if !caravans.blank?
+      user = self.getUser(user_id)
+      jsonReturn[:user_id] = user[:user_id]
+      jsonReturn[:name] = user[:name]
+      jsonReturn[:caravan_ids] = Array.new
+      caravans.each do |caravan|
+        checkCaravan = Caravan.where(caravan_id: caravan.caravan_id, is_active: true)
+        if !checkCaravan.blank?
+          jsonReturn[:caravan_ids].push(caravan.caravan_id)
+        end
+      end
+      if jsonReturn[:caravan_ids].empty?
+        jsonReturn[:reply_code] = ERR_USER_NO_ACTIVE_CARAVANS
+      else
+        jsonReturn[:reply_code] = SUCCESS
+      end
+    else
+      jsonReturn[:reply_code] = ERR_USER_NO_CARAVANS
     end
 
     return jsonReturn

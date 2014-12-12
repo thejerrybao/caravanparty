@@ -13,6 +13,7 @@ Rails.application.routes.draw do
       namespace :caravans do
         get '/', to: '/users#caravans'
         get 'requests/', to: '/users#caravanRequests'
+        get 'active/', to: '/users#activeCaravans'
       end
     end
     resources :friends do

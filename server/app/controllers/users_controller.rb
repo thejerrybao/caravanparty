@@ -49,6 +49,12 @@ class UsersController < ApplicationController
     render json: userCaravanRequests
   end
 
+  # GET /users/:id/caravans/active
+  def activeCaravans
+    userActiveCaravans = User.getUserActiveCaravans(params[:id])
+    render json: userActiveCaravans
+  end
+
   # GET /users/:user_id/friends/requests
   def requests
     requests = Friend.get_pending_requests(params[:user_id])
