@@ -20,9 +20,8 @@ public class createCaravanTest
         extends ActivityInstrumentationTestCase2<create_caravan>
 {
     private create_caravan mActivity;
-    private EditText inputDestination;
+    private Button inputDestination;
     private EditText inputFriend;
-    private Button logging_in;
     private Solo solo;
 
     public createCaravanTest() {
@@ -34,14 +33,14 @@ public class createCaravanTest
         super.setUp();
         solo = new Solo(getInstrumentation(),getActivity());
         mActivity = this.getActivity();
-        inputDestination =  (EditText)mActivity.findViewById(R.id.inputDestination);
-        inputFriend = (EditText) mActivity.findViewById(R.id.addFriendInput);
+        inputDestination =  (Button)mActivity.findViewById(R.id.caravanMap);
+//        inputFriend = (EditText) mActivity.findViewById(R.id.addFriendInput);
     }
 
     public void testPreconditions() {
         assertNotNull(mActivity);
         assertNotNull(inputDestination);
-        assertNotNull(inputFriend);
+//        assertNotNull(inputFriend);
     }
 
 //    @MediumTest
