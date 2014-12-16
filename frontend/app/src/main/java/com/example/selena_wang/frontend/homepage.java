@@ -37,10 +37,10 @@ import java.util.List;
 public class homepage extends Activity {
 
     public static final String url = "http://caravanparty.herokuapp.com/";
-    String SUCCESS = "SUCCESS";
-    String ERR_USER_ALREADY_EXISTS = "ERR_USER_ALREADY_EXISTS";
-    String ERR_USER_DOESNT_EXIST = "ERR_USER_DOESNT_EXIST";
-    String ERR_USER_NO_REQUEST = "ERR_USER_NO_REQUEST";
+    public static final String SUCCESS = "SUCCESS";
+    public static final String ERR_USER_ALREADY_EXISTS = "ERR_USER_ALREADY_EXISTS";
+    public static final String ERR_USER_DOESNT_EXIST = "ERR_USER_DOESNT_EXIST";
+    public static final String ERR_USER_NO_REQUEST = "ERR_USER_NO_REQUEST";
 
     private static boolean active = false;
 
@@ -50,7 +50,7 @@ public class homepage extends Activity {
 
     private static String username;
     private static String user_id;
-    public static String caravanId = "None";
+    private static String caravanId = "None";
     private static String[] friend_ids;
     ListView list;
 

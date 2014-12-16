@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -41,23 +43,23 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class caravan_map extends FragmentActivity {
 
-    private double myLatitude;
-    private double myLongitude;
+    private double myLatitude = 0.0;
+    private double myLongitude = 0.0;
     private Location myLocation;
+    public HashMap<String,LatLng> caravanLocations;
 
-    private double marinaLat = 37.865265;
-    private double marinaLong = -122.309411;
-    private double tempLat = 37.867399;
-    private double tempLong = -122.263364;
-
-
-    ArrayList<LatLng> markerPoints;
-
+    private double destinationLat = 37.865265;
+    private double destinationLong = -122.309411;
     private static boolean active = false;
     private String directionsURL = "http://maps.googleapis.com/maps/api/directions/json?";
 
@@ -72,16 +74,32 @@ public class caravan_map extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.caravan_map_layout);
 
+        caravanLocations = new HashMap<String, LatLng>();
         // Initializing array List
-        markerPoints = new ArrayList<LatLng>();
 
         setUpMapIfNeeded();
-        caravanLocations = new ArrayList<LatLng>();
-        caravanLocations.add(new LatLng(37.865129, -122.256178));
-        caravanLocations.add(new LatLng(37.869296, -122.252616));
-        caravanLocations.add(new LatLng(37.873463, -122.274095));
+        checkCaravan();
 
     }
+
+    private void caravanTimer(){
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask getCaravanInformation = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        new MyAsyncTask().execute("caravanInfo");
+                    }
+                });
+            }
+        };
+        timer.schedule(getCaravanInformation,0,5000);
+    }
+
+    private void checkCaravan(){new MyAsyncTask().execute("caravan");}
 
     @Override
     protected void onResume() {
@@ -144,89 +162,60 @@ public class caravan_map extends FragmentActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Sets up the map if it is possible to do so (i.e., the Google Play services APK is correctly
-     * installed) and the map has not already been instantiated.. This will ensure that we only ever
-     * call {@link #setUpMap()} once when {@link #mMap} is not null.
-     * <p>
-     * If it isn't installed {@link SupportMapFragment} (and
-     * {@link com.google.android.gms.maps.MapView MapView}) will show a prompt for the user to
-     * install/update the Google Play services APK on their device.
-     * <p>
-     * A user can return to this FragmentActivity after following the prompt and correctly
-     * installing/updating/enabling the Google Play services. Since the FragmentActivity may not
-     * have been completely destroyed during this process (it is likely that it would only be
-     * stopped or paused), {@link #onCreate(Bundle)} may not be called again so we should call this
-     * method in {@link #onResume()} to guarantee that it will be called.
-     */
     private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
-            // Check if we were successful in obtaining the map.
 
             mMap.setMyLocationEnabled(true);
             if (mMap != null) {
-//                setUpMap();
+                setUpMap();
 
             }
         }
     }
 
-
-    public ArrayList<LatLng> caravanLocations;
-
-    /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
-     * <p>
-     * This should only be called once and when we are sure that {@link #mMap} is not null.
-     */
     private void setUpMap() {
-        myLocation = mMap.getMyLocation();
-//        if (myLocation!=null){
-//            myLatitude = myLocation.getLatitude();
-//            myLongitude = myLocation.getLongitude();
-        mMap.addMarker(new MarkerOptions().position(new LatLng(tempLat,tempLong)).title("Me"));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(marinaLat,marinaLong))
-                .title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-        final LatLngBounds bounds = new LatLngBounds.Builder()
-                .include(new LatLng(myLatitude, myLongitude)).include(new LatLng(marinaLat, marinaLong)).build();
-//        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-        for(int i = 0; i<caravanLocations.size(); i++){
-            mMap.addMarker(new MarkerOptions().position(caravanLocations.get(i))
-                    .title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
-        }
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLatitude, myLongitude), 8));
 
-//        }else{
-//            mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("NOT ME"));
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 8));
-//        }
-//        mMap.setOnMyLocationChangeListener(myLocationChangeListener);
-        markerPoints.add(new LatLng(tempLat,tempLong));
-        markerPoints.add(new LatLng(marinaLat,marinaLong));
-        LatLng origin = markerPoints.get(0);
-        LatLng dest = markerPoints.get(1);
-        String url = getDirectionsUrl(origin, dest);
+        ArrayList<Marker> markers = new ArrayList<Marker>();
+
+        myLocation = mMap.getMyLocation();
+        if (myLocation!=null) {
+            myLatitude = myLocation.getLatitude();
+            myLongitude = myLocation.getLongitude();
+        }
+
+        Marker me = mMap.addMarker(new MarkerOptions().position(new LatLng(myLatitude,myLongitude)).title("Me"));
+        Marker dest_marker = mMap.addMarker(new MarkerOptions().position(new LatLng(destinationLat,destinationLong))
+                .title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+        markers.add(me);
+        markers.add(dest_marker);
+        Iterator iterator = caravanLocations.entrySet().iterator();
+        while (iterator.hasNext()){
+            Map.Entry pair = (Map.Entry) iterator.next();
+            Marker current = mMap.addMarker(new MarkerOptions().position((LatLng) pair.getValue())
+                    .title((String) pair.getKey()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA)));
+            markers.add(current);
+        }
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for(Marker marker:markers){
+            builder.include(marker.getPosition());
+        }
+        LatLngBounds bounds = builder.build();
+        CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds,50);
+        mMap.animateCamera(update);
+
+        LatLng origin_latlng = new LatLng(myLatitude, myLongitude);
+        LatLng dest_latlng = new LatLng(destinationLat,destinationLong);
+        String url = getDirectionsUrl(origin_latlng, dest_latlng);
 
         DownloadTask downloadTask = new DownloadTask();
 
         downloadTask.execute(url);
     }
-
-//    private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
-//        @Override
-//        public void onMyLocationChange(Location location) {
-//            LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
-//            Marker mMarker = mMap.addMarker(new MarkerOptions().position(loc));
-//            if(mMap != null){
-//                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
-//            }
-//        }
-//    };
 
     private String getDirectionsUrl(LatLng origin,LatLng dest){
 
@@ -279,99 +268,105 @@ public class caravan_map extends FragmentActivity {
         return data;
     }
 
-//    private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
-//        private String username;
-//        private String password;
-//
-//        @Override
-//        protected Double doInBackground(String... params) {
-//            if(params[0].equals("list")){
-//                createList(params[0]);
-//            }
-//            return null;
-//        }
-//
-//        private void createList(String parameter){
-//            String friend_url = "caravan/" + get_user_id() + "/friends/requests";
-//            String caravans_url = "users/" + get_user_id() + "/caravans/invitations";
-//            HttpClient httpclient = new DefaultHttpClient();
-//            HttpGet httpGet_friend = new HttpGet(url + friend_url);
-//            HttpGet  httpGet_caravans = new HttpGet(url+caravans_url);
-//            try{
-//                HttpResponse response_friend = httpclient.execute(httpGet_friend);
-//                HttpResponse response_caravans = httpclient.execute(httpGet_caravans);
-//                try{
-//                    JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
-//                    JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
-//                    create_listView(json_friend, json_caravan);
-//                }catch(JSONException e){
-//                    e.printStackTrace();
-//                }
-//            }catch (IOException e){
-//                e.printStackTrace();
-//            }
-//
-//
-//        }
-//
-//        private JSONArray friends_array;
-//        private JSONArray caravans_array;
-//        private boolean setAdapter = false;
-//        private ArrayList<String[]> list_file = new ArrayList<String[]>();
-//
-//        // list structure = [caravan/friend, username/caravan_id, caravan destination, caravan members]
-//        private void create_listView(JSONObject friends, JSONObject caravans){
-//            try{
-//                friends_array = friends.getJSONArray("requests");
-//
-//            }catch(JSONException e){
-//                e.printStackTrace();
-//                if(friends_array==null){
-//                    friends_array = new JSONArray();
-//                }
-//            }
-//            try{
-//                caravans_array = caravans.getJSONArray("caravan_ids");
-//            }catch(JSONException e){
-//                if(caravans_array==null){
-//                    caravans_array = new JSONArray();
-//                }
-//            }
-//
-//            list_file = new ArrayList<String[]>();
-//
-//            //friend_request structure = [time, "friend_request", username]
-//            //past caravan list structure = [time, "caravan", caravan_id, caravan destination, caravan members]
-//            for(int i = 0; i<friends_array.length(); i++){
-//                try {
-//                    String adding = Integer.toString(friends_array.getInt(i));
-//                    list_file.add(new String[]{"0","friend_request",adding});
-//                }catch(JSONException e){
-//                    e.printStackTrace();
-//                }
-//                setAdapter = true;
-//            }
-//
-//            for(int i = 0; i<caravans_array.length(); i++){
-//                try {
-//                    list_file.add(new String[]{"0","caravan",caravans_array.getJSONObject(i).toString()});
-//                }catch(JSONException e){
-//                    e.printStackTrace();
-//                }
-//                setAdapter = true;
-//            }
-//        }
-//
-//        protected void onPostExecute(Double result){
-//            if (setAdapter){
-//                home_list_adapter home_list_adapter= new home_list_adapter(list_file,homepage.this);
-//                list.setAdapter(home_list_adapter);
-//            }
-//        }
-//
-//
-//
-//    }
+    private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
+
+        @Override
+        protected Double doInBackground(String... params) {
+            if(params[0].equals("caravan")){
+                getCaravan(params[0]);
+            }
+            if(params[0].equals("caravanInfo")){
+                addCaravanInfo();
+            }
+            return null;
+        }
+
+        private Boolean activeCaravan = false;
+        private void getCaravan(String parameter){
+            String caravans_url = "users/" + homepage.get_user_id() + "/caravans/active";
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpGet  httpGet_caravans = new HttpGet(homepage.url+caravans_url);
+            try{
+                HttpResponse response_caravans = httpclient.execute(httpGet_caravans);
+                try{
+                    JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
+                    if (json_caravan.getString("reply_code")== homepage.SUCCESS){
+                        JSONArray active_caravans = json_caravan.getJSONArray("caravan_ids");
+                        for (int i = 0; i < active_caravans.length(); i++){
+                            homepage.set_caravanId(active_caravans.getString(i));
+                            activeCaravan = true;
+                        }
+                    }
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        private JSONArray caravans_array;
+        private HashMap<String, LatLng> list_file;
+        private boolean addToList = false;
+        private int destLat = 0;
+        private int destLong = 0;
+
+        private void addCaravanInfo(){
+            String caravans_url = "caravans/" + homepage.get_caravanId();
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpGet  httpGet_caravans = new HttpGet(homepage.url+caravans_url);
+            try{
+                HttpResponse response_caravans = httpclient.execute(httpGet_caravans);
+                try{
+                    JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
+                    if (json_caravan.getString("reply_code")== homepage.SUCCESS){
+
+                        JSONObject destinationObject = json_caravan.getJSONObject("destination");
+                        destLat = destinationObject.getInt("latitude");
+                        destLong = destinationObject.getInt("longitude");
+
+                        JSONObject participants = json_caravan.getJSONObject("participants");
+                        list_file = new HashMap<String,LatLng>();
+                        for (int i = 0; i < participants.names().length(); i++){
+                            String user = participants.names().getString(i);
+                            JSONObject user_object = participants.getJSONObject(user);
+                            int Lat = user_object.getInt("latitude");
+                            int Long = user_object.getInt("longitude");
+                            list_file.put(user, new LatLng(Lat,Long));
+                            addToList= true;
+                        }
+                    }
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        protected void onPostExecute(Double result){
+            if (addToList){
+                Iterator iterator = list_file.entrySet().iterator();
+                while (iterator.hasNext()){
+                    Map.Entry pair = (Map.Entry)iterator.next();
+                    caravanLocations.put((String)pair.getKey(),(LatLng)pair.getValue());
+                }
+                if(destLat!=0 && destLong!=0){
+                    destinationLat = destLat;
+                    destinationLong = destLong;
+                }
+                setUpMap();
+            }
+
+            if(activeCaravan){
+                addCaravanInfo();
+                caravanTimer();
+            }
+        }
+
+
+
+    }
 
     // Fetches data from url passed
     private class DownloadTask extends AsyncTask<String, Void, String>{
@@ -453,8 +448,8 @@ public class caravan_map extends FragmentActivity {
 
                 // Adds all the points in the route to lineOptions
                 lineOptions.addAll(points);
-                lineOptions.width(2);
-                lineOptions.color(Color.RED);
+                lineOptions.width(5);
+                lineOptions.color(Color.CYAN);
             }
 
             // Draws route to destination
