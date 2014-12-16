@@ -132,6 +132,17 @@ public class homepage extends Activity {
         new MyAsyncTask().execute("list");
     }
 
+    public void onClickLeave(View view) {
+        new MyAsyncTask().execute("leave");
+    }
+
+    public void onClickCurrent (View view) {
+        if (caravanId != "None") {
+            Intent intent = new Intent(homepage.this, caravan_map.class);
+            startActivity(intent);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -180,7 +191,85 @@ public class homepage extends Activity {
             if(params[0].equals("list")){
                 createList(params[0]);
             }
+            else if(params[0].equals("leave")) {
+                postData(params[0]);
+            }
             return null;
+        }
+
+        private void postData(String parameter) {
+            HttpClient httpclient = new DefaultHttpClient();
+            String extend_url = "caravans/" + get_caravanId() + "/leave/" + get_user_id();
+            HttpPost httppost = new HttpPost(url + extend_url);
+
+            try {
+                HttpResponse response = httpclient.execute(httppost);
+                try {
+                    //get Json from response
+                    String json_string = EntityUtils.toString(response.getEntity());
+                    System.out.println(json_string);
+                    JSONObject json = new JSONObject(json_string);
+                    removeCaravan(json);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void removeCaravan(JSONObject json){
+            final JSONObject json2 = json;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String ERR = "ERR";
+                    String caravan_id = "id";
+                    try {
+                        ERR = json2.getString("reply_code");
+                        caravan_id = json2.getString("id");
+                    }catch(JSONException e){
+                        e.printStackTrace();
+                    }
+
+                    System.out.println(ERR);
+                    if(ERR.equals("SUCCESS")){
+                        homepage.set_caravanId("None");
+                        Intent intent = new Intent(homepage.this, create_caravan.class);
+                        startActivity(intent);
+                    }else{
+                        createAlertDialog(ERR);
+                    }
+                }
+            });
+
+        }
+
+        public void createAlertDialog(String ERR){
+            String message = "";
+            System.out.println(ERR);
+            if(ERR=="ERR_USER_NOT_IN_CARAVAN"){
+                message = "User not in Carvan";
+            }else if(ERR == "ERR_HOST_CANNOT_BE_REMOVED"){
+                message = "Host cannot be removed if caravan is not empty";
+            }
+            else if(ERR=="ERR_USER_DOESNT_EXIST"){
+                message = "User doesn't exist";
+            }else{
+                System.out.println("I dont know unknown error?");
+                return;
+            }
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(homepage.this);
+            alertDialogBuilder.setMessage(message);
+            alertDialogBuilder.setNegativeButton("Okay",new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog,int id) {
+                    dialog.cancel();
+                }
+            });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
         }
 
         private void createList(String parameter){
