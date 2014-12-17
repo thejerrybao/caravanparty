@@ -28,4 +28,13 @@
         android:text="Delete"
         android:textSize="20dp"
         />
+    <Button
+        android:id="@+id/addToCaravan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add To Caravan"
+        android:textSize="20dp"
+        android:layout_alignTop="@+id/delete_friend"
+        android:layout_toRightOf="@+id/delete_friend"
+        android:layout_toEndOf="@+id/delete_friend" />
 </RelativeLayout>
