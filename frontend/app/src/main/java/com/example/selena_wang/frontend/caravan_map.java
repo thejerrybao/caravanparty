@@ -298,6 +298,25 @@ public class caravan_map extends FragmentActivity {
             return null;
         }
 
+        private void updateLocation(String parameter){
+            String caravans_url = "users/" + homepage.get_user_id() + "/location/";
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost  httpPost_endCaravan = new HttpPost(homepage.url+caravans_url);
+            try{
+                HttpResponse response_caravans = httpclient.execute(httpPost_endCaravan);
+                try{
+                    JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
+                    if (json_caravan.getString("reply_code")== homepage.SUCCESS){
+                        caravanEnded = true;
+                    }
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
         private Boolean caravanEnded = false;
         private void endCaravan(String parameter){
             String caravans_url = "caravans/" + homepage.get_caravanId() + "/end/" + homepage.get_user_id();
@@ -411,6 +430,9 @@ public class caravan_map extends FragmentActivity {
             if(checkHost){
                 isHost = true;
             }
+
+
+
         }
 
 
