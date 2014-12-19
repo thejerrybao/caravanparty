@@ -50,6 +50,15 @@ class Caravan < ActiveRecord::Base
     if !cu || cu.accepted_invitation == true
       return $ERR_NO_EXISTING_INVITATION
     end
+
+    # pre-demo update
+    cus = CaravanUser.where(user_id: user_id)
+    for i in 0 ... cus.size
+      if cus[i].caravan_id != cu.caravan_id
+        cus[i].destroy
+      end
+    end
+
       
     cu.accepted_invitation = true
     cu.save
@@ -79,9 +88,15 @@ class Caravan < ActiveRecord::Base
     all_cu = CaravanUser.where(caravan_id: caravan_id)
     if !cu
       return $ERR_USER_NOT_IN_CARAVAN
-    elsif cu.is_host && all_cu.length > 1
+      
+    # pre-demo update
+      
+    # elsif cu.is_host && all_cu.length > 1
+    elsif cu.is_host
+      self.end_caravan(caravan_id, user_id)
+      
       # host cannot leave if he there are others
-      return $ERR_HOST_CANNOT_BE_REMOVED
+      # return $ERR_HOST_CANNOT_BE_REMOVED
     end
     
     cu.destroy
