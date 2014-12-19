@@ -25,11 +25,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ListView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -52,6 +54,8 @@ public class create_caravan extends Activity implements OnItemClickListener, OnI
         return active;
     }
 
+    public ListView friendList;
+
     // Initialize variables
     //private Button createC;
     String SUCCESS = "SUCCESS";
@@ -72,6 +76,10 @@ public class create_caravan extends Activity implements OnItemClickListener, OnI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_caravan_layout);
+
+        friendList = (ListView) findViewById(R.id.addfriend_list);
+        createListView();
+
         /*
         // Get AutoCompleteTextView reference from xml
         textView = (AutoCompleteTextView) findViewById(R.id.inputAddress);
@@ -87,6 +95,10 @@ public class create_caravan extends Activity implements OnItemClickListener, OnI
         textView.setOnItemClickListener(this);*/
     }
 
+    private void createListView(){
+        new MyAsyncTask().execute("list");
+
+    }
     //createC = (Button) findViewById(R.id.caravanMap);
     //createC.setOnClickListener(new View.OnClickListener() {
             /*@Override
@@ -146,11 +158,77 @@ public class create_caravan extends Activity implements OnItemClickListener, OnI
 
     private class MyAsyncTask extends AsyncTask<String, Integer, Double> {
         private String host_id = homepage.get_user_id();
+        private Boolean setAdapter = false;
+
+        ArrayList<String[]> list_file;
 
         @Override
         protected Double doInBackground(String... params) {
-            postData(params[0]);
+            if(params[0].equals("list")){
+                createList(params[0]);
+            }
+            if(params[0].equals("create")) {
+                postData(params[0]);
+            }
             return null;
+        }
+
+        private void createList(String parameter){
+            String friend_url = "users/" + homepage.get_user_id() + "/friends";
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpGet httpGet_friend = new HttpGet(homepage.url + friend_url);
+            try{
+                HttpResponse response_friend = httpclient.execute(httpGet_friend);
+                try{
+                    JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
+                    create_listView(json_friend);
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+
+        }
+
+        private void getUser(String user_id){
+            String friend_url = "users/" + user_id;
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpGet httpGet_friend = new HttpGet(homepage.url + friend_url);
+            try{
+                HttpResponse response_friend = httpclient.execute(httpGet_friend);
+                try{
+                    JSONObject json_friend = new JSONObject(EntityUtils.toString(response_friend.getEntity()));
+                    String name = json_friend.getString("name");
+                    String id = json_friend.getString("user_id");
+                    String[] to_add = {"time","friend", name, id};
+                    list_file.add(to_add);
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        private void create_listView(JSONObject friends){
+            JSONArray friend_array = new JSONArray();
+            try{
+                friend_array = friends.getJSONArray("friends");
+            }catch(JSONException e){
+                e.printStackTrace();
+            }
+
+            list_file = new ArrayList<String[]>();
+            for(int i = 0; i<friend_array.length(); i++){
+                try {
+                    getUser(Integer.toString(friend_array.getInt(i)));
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+            setAdapter = true;
         }
 
         private void postData(String parameter) {
@@ -211,6 +289,13 @@ public class create_caravan extends Activity implements OnItemClickListener, OnI
                 }
             });
 
+        }
+
+        protected void onPostExecute(Double result){
+            if (setAdapter){
+                home_list_adapter friend_list_adapter= new home_list_adapter(list_file,create_caravan.this);
+                friendList.setAdapter(friend_list_adapter);
+            }
         }
     }
 
