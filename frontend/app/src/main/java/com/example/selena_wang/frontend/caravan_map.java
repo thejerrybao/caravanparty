@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -53,15 +54,15 @@ import java.util.TimerTask;
 
 public class caravan_map extends FragmentActivity {
 
-    private double myLatitude = 0.0;
-    private double myLongitude = 0.0;
+    private double myLatitude = 37.865265;
+    private double myLongitude = -122.309411;
     private Location myLocation;
     public HashMap<String,LatLng> caravanLocations;
+    private Boolean isHost = false;
 
     private double destinationLat = 37.865265;
     private double destinationLong = -122.309411;
     private static boolean active = false;
-    private String directionsURL = "http://maps.googleapis.com/maps/api/directions/json?";
 
     public static boolean getActive(){
         return active;
@@ -101,11 +102,22 @@ public class caravan_map extends FragmentActivity {
 
     private void checkCaravan(){new MyAsyncTask().execute("caravan");}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setUpMap();
+    public void onClickEnd(View view){
+        if(isHost) {
+            new MyAsyncTask().execute("end");
+            Intent intent = new Intent(this, homepage.class);
+            if (homepage.getActive()) {
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
+            startActivity(intent);
+        }
     }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        setUpMap();
+//    }
 
     @Override
     protected void onRestart(){
@@ -168,12 +180,16 @@ public class caravan_map extends FragmentActivity {
             // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
-
-            mMap.setMyLocationEnabled(true);
-            if (mMap != null) {
-                setUpMap();
-
+            if(mMap==null){
+                throw new NullPointerException("mMap is null, meaning Google Play services APK is not installed");
             }
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    setUpMap();
+                }
+            });
         }
     }
 
@@ -186,11 +202,8 @@ public class caravan_map extends FragmentActivity {
             myLatitude = myLocation.getLatitude();
             myLongitude = myLocation.getLongitude();
         }
-
-        Marker me = mMap.addMarker(new MarkerOptions().position(new LatLng(myLatitude,myLongitude)).title("Me"));
         Marker dest_marker = mMap.addMarker(new MarkerOptions().position(new LatLng(destinationLat,destinationLong))
                 .title("Destination").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-        markers.add(me);
         markers.add(dest_marker);
         Iterator iterator = caravanLocations.entrySet().iterator();
         while (iterator.hasNext()){
@@ -204,6 +217,7 @@ public class caravan_map extends FragmentActivity {
         for(Marker marker:markers){
             builder.include(marker.getPosition());
         }
+        builder.include(new LatLng(myLatitude,myLongitude));
         LatLngBounds bounds = builder.build();
         CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds,50);
         mMap.animateCamera(update);
@@ -278,9 +292,33 @@ public class caravan_map extends FragmentActivity {
             if(params[0].equals("caravanInfo")){
                 addCaravanInfo();
             }
+            if(params[0].equals("end")){
+                endCaravan(params[0]);
+            }
             return null;
         }
 
+        private Boolean caravanEnded = false;
+        private void endCaravan(String parameter){
+            String caravans_url = "caravans/" + homepage.get_caravanId() + "/end/" + homepage.get_user_id();
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpPost  httpPost_endCaravan = new HttpPost(homepage.url+caravans_url);
+            try{
+                HttpResponse response_caravans = httpclient.execute(httpPost_endCaravan);
+                try{
+                    JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
+                    if (json_caravan.getString("reply_code")== homepage.SUCCESS){
+                        caravanEnded = true;
+                    }
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        private Boolean checkHost = false;
         private Boolean activeCaravan = false;
         private void getCaravan(String parameter){
             String caravans_url = "users/" + homepage.get_user_id() + "/caravans/active";
@@ -291,6 +329,9 @@ public class caravan_map extends FragmentActivity {
                 try{
                     JSONObject json_caravan = new JSONObject(EntityUtils.toString(response_caravans.getEntity()));
                     if (json_caravan.getString("reply_code")== homepage.SUCCESS){
+                        if(json_caravan.getString("host_id") == homepage.get_user_id() && isHost == false){
+                            checkHost = true;
+                        }
                         JSONArray active_caravans = json_caravan.getJSONArray("caravan_ids");
                         for (int i = 0; i < active_caravans.length(); i++){
                             homepage.set_caravanId(active_caravans.getString(i));
@@ -358,9 +399,17 @@ public class caravan_map extends FragmentActivity {
                 setUpMap();
             }
 
+            if(caravanEnded){
+                homepage.set_caravanId("");
+            }
+
             if(activeCaravan){
                 addCaravanInfo();
                 caravanTimer();
+            }
+
+            if(checkHost){
+                isHost = true;
             }
         }
 
@@ -448,7 +497,7 @@ public class caravan_map extends FragmentActivity {
 
                 // Adds all the points in the route to lineOptions
                 lineOptions.addAll(points);
-                lineOptions.width(5);
+                lineOptions.width(10);
                 lineOptions.color(Color.CYAN);
             }
 

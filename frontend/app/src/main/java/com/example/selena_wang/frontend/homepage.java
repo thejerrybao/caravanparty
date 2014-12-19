@@ -185,7 +185,7 @@ public class homepage extends Activity {
 
         private void createList(String parameter){
             String friend_url = "users/" + get_user_id() + "/friends/requests";
-            String caravans_url = "users/" + get_user_id() + "/caravans/invitations";
+            String caravans_url = "users/" + get_user_id() + "/caravans/requests";
             HttpClient httpclient = new DefaultHttpClient();
             HttpGet httpGet_friend = new HttpGet(url + friend_url);
             HttpGet  httpGet_caravans = new HttpGet(url+caravans_url);
